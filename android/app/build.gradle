@@ -107,6 +107,11 @@ android {
     }
 }
 
+// Link fonts for react-native-vector-icons
+project.ext.vectoricons = [
+    project: [name: ':react-native-vector-icons']
+]
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
