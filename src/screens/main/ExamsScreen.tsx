@@ -1,9 +1,9 @@
 /**
- * Exams Screen
- * Display all exams and exam management
+ * Exams Screen (Tests)
+ * Browse all mock tests - pending and completed, sorted chronologically
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,203 +11,258 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
+  TextInput,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
-import { Header, Card } from '../../components';
+import { Card } from '../../components';
 
-interface Exam {
+interface TestItem {
   id: string;
-  name: string;
+  title: string;
   subject: string;
-  date: string;
-  time: string;
+  questions: number;
   duration: number;
-  status: 'upcoming' | 'ongoing' | 'completed';
+  marks: number;
+  status: 'pending' | 'completed';
+  score?: number;
+  percentage?: number;
+  daysLeft?: number;
 }
+
+// Separator component
+const ItemSeparator = () => <View style={styles.separator} />;
 
 export const ExamsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const [selectedTab, setSelectedTab] = useState<'upcoming' | 'completed'>(
-    'upcoming'
-  );
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Memoized separator component
-  const ItemSeparator = React.useMemo(
-    () => () => <View style={styles.separator} />,
-    []
-  );
+  // Sort: pending first, then completed
+  const sortedTests = useMemo(() => {
+    const allTests: TestItem[] = [
+      // Pending tests
+      {
+        id: '1',
+        title: 'Mathematics Full Mock',
+        subject: 'Mathematics',
+        questions: 30,
+        duration: 90,
+        marks: 100,
+        status: 'pending',
+        daysLeft: 3,
+      },
+      {
+        id: '2',
+        title: 'Science Combined',
+        subject: 'Science',
+        questions: 35,
+        duration: 120,
+        marks: 120,
+        status: 'pending',
+        daysLeft: 7,
+      },
+      {
+        id: '3',
+        title: 'English Comprehension',
+        subject: 'English',
+        questions: 25,
+        duration: 60,
+        marks: 80,
+        status: 'pending',
+        daysLeft: 5,
+      },
+      // Completed tests
+      {
+        id: '4',
+        title: 'Social Studies Full Test',
+        subject: 'Social Studies',
+        questions: 40,
+        duration: 100,
+        marks: 100,
+        status: 'completed',
+        score: 78,
+        percentage: 78,
+      },
+      {
+        id: '5',
+        title: 'Mathematics Chapter Test',
+        subject: 'Mathematics',
+        questions: 15,
+        duration: 45,
+        marks: 50,
+        status: 'completed',
+        score: 42,
+        percentage: 84,
+      },
+      {
+        id: '6',
+        title: 'English Grammar Test',
+        subject: 'English',
+        questions: 20,
+        duration: 30,
+        marks: 60,
+        status: 'completed',
+        score: 54,
+        percentage: 90,
+      },
+    ];
 
-  // Mock data
-  const exams: Exam[] = [
-    {
-      id: '1',
-      name: 'Final Exam - Mathematics',
-      subject: 'Mathematics',
-      date: '2024-12-20',
-      time: '10:00 AM',
-      duration: 120,
-      status: 'upcoming',
-    },
-    {
-      id: '2',
-      name: 'Midterm - English',
-      subject: 'English',
-      date: '2024-12-15',
-      time: '2:00 PM',
-      duration: 90,
-      status: 'upcoming',
-    },
-    {
-      id: '3',
-      name: 'Quiz - Science',
-      subject: 'Science',
-      date: '2024-12-10',
-      time: '11:30 AM',
-      duration: 45,
-      status: 'completed',
-    },
-  ];
+    return [...allTests].sort((a, b) => {
+      if (a.status === 'pending' && b.status !== 'pending') return -1;
+      if (a.status !== 'pending' && b.status === 'pending') return 1;
+      if (a.status === 'pending' && b.status === 'pending') {
+        return (a.daysLeft || 999) - (b.daysLeft || 999);
+      }
+      return 0;
+    });
+  }, []);
 
-  const filteredExams = exams.filter(
-    (exam) => exam.status === selectedTab || exam.status === 'completed'
-  );
+  const filteredTests = useMemo(() => {
+    return sortedTests.filter(
+      (test) =>
+        test.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        test.subject.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, sortedTests]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming':
-        return Colors.warning;
-      case 'ongoing':
-        return Colors.info;
-      case 'completed':
-        return Colors.success;
-      default:
-        return Colors.gray500;
-    }
+  const renderTestCard = ({ item }: { item: TestItem }) => {
+    const isPending = item.status === 'pending';
+    // Color coding by subject
+    const subjectColors: { [key: string]: string } = {
+      'Mathematics': '#FF6B6B',
+      'Science': '#4ECDC4',
+      'English': '#FFB84D',
+      'Social Studies': '#95E1D3',
+    };
+    const cardColor = subjectColors[item.subject] || Colors.primary;
+
+    return (
+      <TouchableOpacity activeOpacity={0.7}>
+        <Card
+          variant="filled"
+          style={[
+            styles.testCard,
+            { borderLeftColor: cardColor, borderLeftWidth: 4 }
+          ]}
+        >
+          {/* Header with Title and Badge */}
+          <View style={styles.cardHeader}>
+            <View style={styles.titleSection}>
+              <Text style={styles.testTitle} numberOfLines={2}>{item.title}</Text>
+              <Text style={styles.testSubject}>{item.subject}</Text>
+            </View>
+            {isPending ? (
+              <View style={styles.daysLeftBadge}>
+                <MaterialIcons
+                  name="schedule"
+                  size={14}
+                  color={Colors.warning}
+                />
+                <Text style={styles.daysLeftText}>{item.daysLeft}d</Text>
+              </View>
+            ) : (
+              <View style={styles.scoreBadge}>
+                <Text style={styles.scoreValue}>{item.percentage}%</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Details Row and Button */}
+          <View style={styles.cardFooter}>
+            <View style={styles.detailsRow}>
+              <View style={styles.detail}>
+                <MaterialIcons
+                  name="help-outline"
+                  size={14}
+                  color={Colors.textSecondary}
+                />
+                <Text style={styles.detailText}>{item.questions}Q</Text>
+              </View>
+              <Text style={styles.detailSeparator}>•</Text>
+              <View style={styles.detail}>
+                <MaterialIcons
+                  name="schedule"
+                  size={14}
+                  color={Colors.textSecondary}
+                />
+                <Text style={styles.detailText}>{item.duration}m</Text>
+              </View>
+              <Text style={styles.detailSeparator}>•</Text>
+              <View style={styles.detail}>
+                <MaterialIcons
+                  name="star"
+                  size={14}
+                  color={Colors.textSecondary}
+                />
+                <Text style={styles.detailText}>{item.marks}</Text>
+              </View>
+            </View>
+
+            {/* Action Button - Right aligned */}
+            <TouchableOpacity
+              style={[styles.actionButton, !isPending && styles.actionButtonCompleted]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.actionButtonText, !isPending && styles.actionButtonTextCompleted]}>
+                {isPending ? 'Start' : 'Details'}
+              </Text>
+              <MaterialIcons
+                name={isPending ? 'play-arrow' : 'arrow-forward'}
+                size={14}
+                color={isPending ? Colors.white : Colors.primary}
+              />
+            </TouchableOpacity>
+          </View>
+        </Card>
+      </TouchableOpacity>
+    );
   };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'upcoming':
-        return 'schedule';
-      case 'ongoing':
-        return 'play-circle-outline';
-      case 'completed':
-        return 'check-circle';
-      default:
-        return 'info';
-    }
-  };
-
-  const renderExamCard = ({ item }: { item: Exam }) => (
-    <Card variant="elevated" style={styles.examCard}>
-      <View style={styles.examCardHeader}>
-        <View style={styles.examInfo}>
-          <Text style={styles.examName} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <Text style={styles.examSubject}>{item.subject}</Text>
-        </View>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(item.status) + '20' },
-          ]}
-        >
-          <MaterialIcons
-            name={getStatusIcon(item.status)}
-            size={20}
-            color={getStatusColor(item.status)}
-          />
-        </View>
+    filteredTests.filter((t) => t.status === 'pending').length;
+    filteredTests.filter((t) => t.status === 'completed').length;
+    return (
+        <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Header */}
+      <View style={styles.titleBar}>
+        <Text style={styles.screenTitle}>Tests</Text>
       </View>
 
-      <View style={styles.divider} />
-
-      <View style={styles.examDetails}>
-        <View style={styles.detailItem}>
-          <MaterialIcons
-            name="event"
-            size={18}
-            color={Colors.textSecondary}
-          />
-          <Text style={styles.detailText}>{item.date}</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <MaterialIcons
-            name="access-time"
-            size={18}
-            color={Colors.textSecondary}
-          />
-          <Text style={styles.detailText}>{item.time}</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <MaterialIcons
-            name="timer"
-            size={18}
-            color={Colors.textSecondary}
-          />
-          <Text style={styles.detailText}>{item.duration} minutes</Text>
-        </View>
+      {/* Search */}
+      <View style={styles.searchContainer}>
+        <MaterialIcons
+          name="search"
+          size={20}
+          color={Colors.textSecondary}
+        />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search tests..."
+          placeholderTextColor={Colors.textSecondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery !== '' && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <MaterialIcons
+              name="close"
+              size={20}
+              color={Colors.textSecondary}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
-      {item.status === 'upcoming' && (
-        <TouchableOpacity style={styles.startButton}>
-          <Text style={styles.startButtonText}>Start Preparation</Text>
-        </TouchableOpacity>
-      )}
-    </Card>
-  );
 
-  return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Header title="Exams" />
-
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            selectedTab === 'upcoming' && styles.activeTab,
-          ]}
-          onPress={() => setSelectedTab('upcoming')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === 'upcoming' && styles.activeTabText,
-            ]}
-          >
-            Upcoming
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            selectedTab === 'completed' && styles.activeTab,
-          ]}
-          onPress={() => setSelectedTab('completed')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              selectedTab === 'completed' && styles.activeTabText,
-            ]}
-          >
-            Completed
-          </Text>
-        </TouchableOpacity>
-      </View>
-
+      {/* Tests List */}
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.content}>
-          {filteredExams.length > 0 ? (
+        <View style={styles.listContainer}>
+          {filteredTests.length > 0 ? (
             <FlatList
-              data={filteredExams}
-              renderItem={renderExamCard}
+              data={filteredTests}
+              renderItem={renderTestCard}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
               ItemSeparatorComponent={ItemSeparator}
@@ -215,11 +270,11 @@ export const ExamsScreen: React.FC = () => {
           ) : (
             <View style={styles.emptyState}>
               <MaterialIcons
-                name="event-busy"
+                name="assignment-ind"
                 size={48}
                 color={Colors.gray300}
               />
-              <Text style={styles.emptyStateText}>No exams found</Text>
+              <Text style={styles.emptyText}>No tests found</Text>
             </View>
           )}
         </View>
@@ -233,106 +288,178 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+
+  // Header
+  titleBar: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    paddingBottom: Spacing.lg,
   },
-  tab: {
+  screenTitle: {
+    fontSize: FontSizes.headlineSmall,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+
+  // Search
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.large,
+    borderWidth: 1,
+    borderColor: Colors.gray100,
+    gap: Spacing.sm,
+  },
+  searchInput: {
     flex: 1,
     paddingVertical: Spacing.md,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  activeTab: {
-    borderBottomColor: Colors.primary,
-  },
-  tabText: {
     fontSize: FontSizes.bodyMedium,
-    fontWeight: '500',
-    color: Colors.textSecondary,
+    color: Colors.textPrimary,
   },
-  activeTabText: {
-    color: Colors.primary,
-  },
+
+
+  // List
   scrollView: {
     flex: 1,
   },
-  content: {
+  listContainer: {
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
+    paddingVertical: Spacing.md,
   },
-  examCard: {
-    marginBottom: Spacing.sm,
+
+  // Test Card
+  testCard: {
+    overflow: 'hidden',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: Colors.white,
   },
-  examCardHeader: {
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
+    gap: Spacing.md,
   },
-  examInfo: {
+  titleSection: {
     flex: 1,
-    marginRight: Spacing.md,
   },
-  examName: {
-    fontSize: FontSizes.bodyLarge,
-    fontWeight: '600',
+  testTitle: {
+    fontSize: FontSizes.bodyMedium,
+    fontWeight: '700',
     color: Colors.textPrimary,
     marginBottom: Spacing.xs,
+    lineHeight: 20,
   },
-  examSubject: {
-    fontSize: FontSizes.bodySmall,
+  testSubject: {
+    fontSize: FontSizes.labelSmall,
     color: Colors.textSecondary,
+    fontWeight: '500',
   },
-  statusBadge: {
-    width: 40,
-    height: 40,
+  daysLeftBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.warning + '25',
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 2,
     borderRadius: BorderRadius.medium,
+    gap: Spacing.xs,
+    minWidth: 50,
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.warning,
+  },
+  daysLeftText: {
+    fontSize: FontSizes.labelSmall,
+    fontWeight: '700',
+    color: Colors.warning,
+  },
+  scoreBadge: {
+    backgroundColor: Colors.success + '20',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.medium,
+    minWidth: 50,
     alignItems: 'center',
   },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.gray200,
-    marginVertical: Spacing.md,
+  scoreValue: {
+    fontSize: FontSizes.labelSmall,
+    fontWeight: '700',
+    color: Colors.success,
   },
-  examDetails: {
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
+
+  // Card Footer - Details and Button
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
   },
-  detailItem: {
+
+  // Details
+  detailsRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  detailText: {
-    fontSize: FontSizes.bodySmall,
-    color: Colors.textSecondary,
+  detail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
-  startButton: {
+  detailText: {
+    fontSize: FontSizes.labelSmall,
+    color: Colors.textPrimary,
+    fontWeight: '700',
+  },
+  detailSeparator: {
+    fontSize: FontSizes.labelSmall,
+    color: Colors.gray300,
+  },
+
+  // Action Button - Compact, Right-aligned
+  actionButton: {
+    flexDirection: 'row',
     backgroundColor: Colors.primary,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.medium,
     alignItems: 'center',
-    marginTop: Spacing.md,
+    justifyContent: 'center',
+    gap: 4,
+    minWidth: 70,
   },
-  startButtonText: {
-    fontSize: FontSizes.bodyMedium,
-    fontWeight: '600',
+  actionButtonCompleted: {
+    backgroundColor: Colors.success + '20',
+    borderWidth: 1,
+    borderColor: Colors.success,
+  },
+  actionButtonText: {
+    fontSize: FontSizes.labelSmall,
+    fontWeight: '700',
     color: Colors.white,
   },
-  separator: {
-    height: Spacing.sm,
+  actionButtonTextCompleted: {
+    color: Colors.success,
   },
+
+  // Separator
+  separator: {
+    height: Spacing.md,
+  },
+
+  // Empty State
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.xxl,
   },
-  emptyStateText: {
+  emptyText: {
     fontSize: FontSizes.bodyMedium,
     color: Colors.textSecondary,
     marginTop: Spacing.md,

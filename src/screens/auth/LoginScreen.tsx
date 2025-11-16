@@ -1,6 +1,6 @@
 /**
  * Login Screen
- * Modern Material Design login interface
+ * Modern minimal login interface for students
  */
 
 import React, { useState } from 'react';
@@ -12,6 +12,7 @@ import {
   Text,
   KeyboardAvoidingView,
   Platform,
+
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
@@ -70,88 +71,85 @@ export const LoginScreen: React.FC = () => {
     <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidingView}
+        style={styles.container}
       >
         <ScrollView
-          style={styles.container}
+          style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.headerSection}>
-            <View style={styles.logoContainer}>
-              <View style={styles.logoCircle}>
-                <MaterialIcons
-                  name="school"
-                  size={48}
-                  color={Colors.white}
-                />
-              </View>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.logoCircle}>
+              <MaterialIcons name="school" size={40} color={Colors.primary} />
             </View>
-            <Text style={styles.appTitle}>VEDAI</Text>
-            <Text style={styles.appSubtitle}>Student Learning Platform</Text>
+            <Text style={styles.appName}>VedAI</Text>
+            <Text style={styles.tagline}>Learn Smart, Score Better</Text>
           </View>
 
-          <View style={styles.formSection}>
+          {/* Form */}
+          <View style={styles.formContainer}>
             <Text style={styles.formTitle}>Welcome Back</Text>
-            <Text style={styles.formSubtitle}>
-              Sign in to your account to continue
-            </Text>
+            <Text style={styles.formSubtitle}>Sign in to continue learning</Text>
 
             {loginError && (
-              <View style={styles.errorContainer}>
+              <View style={styles.errorBanner}>
                 <MaterialIcons
                   name="error-outline"
-                  size={20}
+                  size={18}
                   color={Colors.error}
                 />
                 <Text style={styles.errorText}>{loginError}</Text>
               </View>
             )}
 
-            <TextInputField
-              label="Email Address"
-              placeholder="Enter your email"
-              value={form.values.email}
-              onChangeText={(email) => form.setValue('email', email)}
-              onBlur={() => form.setFieldTouched('email')}
-              error={form.touched.email ? form.errors.email : undefined}
-              keyboardType="default"
-              iconName="email"
-              returnKeyType="next"
-            />
+            <View style={styles.inputGroup}>
+              <TextInputField
+                label="Email"
+                placeholder="your.email@example.com"
+                value={form.values.email}
+                onChangeText={(email) => form.setValue('email', email)}
+                onBlur={() => form.setFieldTouched('email')}
+                error={form.touched.email ? form.errors.email : undefined}
+                keyboardType="default"
+                iconName="email"
+                returnKeyType="next"
+              />
 
-            <TextInputField
-              label="Password"
-              placeholder="Enter your password"
-              value={form.values.password}
-              onChangeText={(password) => form.setValue('password', password)}
-              onBlur={() => form.setFieldTouched('password')}
-              error={form.touched.password ? form.errors.password : undefined}
-              secureTextEntry
-              iconName="lock"
-              keyboardType="default"
-              returnKeyType="done"
-              onSubmitEditing={handleLogin}
-            />
+              <TextInputField
+                label="Password"
+                placeholder="Enter password"
+                value={form.values.password}
+                onChangeText={(password) => form.setValue('password', password)}
+                onBlur={() => form.setFieldTouched('password')}
+                error={form.touched.password ? form.errors.password : undefined}
+                secureTextEntry
+                iconName="lock"
+                keyboardType="default"
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
+              />
+            </View>
 
-            <TouchableOpacity style={styles.forgotPasswordContainer}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            <TouchableOpacity style={styles.forgotLink}>
+              <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
 
             <Button
-              title="Sign In"
+              title={form.isSubmitting ? 'Signing in...' : 'Sign In'}
               onPress={handleLogin}
               variant="primary"
               size="large"
-              loading={form.isSubmitting}
+              disabled={form.isSubmitting}
               style={styles.loginButton}
             />
           </View>
 
-          <View style={styles.signupSection}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>New to VedAI? </Text>
             <TouchableOpacity>
-              <Text style={styles.signupLink}>Sign Up</Text>
+              <Text style={styles.signupLink}>Create account</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -165,102 +163,114 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.xl,
+    justifyContent: 'space-between',
   },
-  headerSection: {
+
+  // Header
+  header: {
     alignItems: 'center',
     marginBottom: Spacing.xxl,
   },
-  logoContainer: {
-    marginBottom: Spacing.lg,
-  },
   logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.primary,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: Colors.primary + '15',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    marginBottom: Spacing.lg,
   },
-  appTitle: {
-    fontSize: FontSizes.headlineLarge,
+  appName: {
+    fontSize: FontSizes.displaySmall,
     fontWeight: '700',
     color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.sm,
   },
-  appSubtitle: {
+  tagline: {
     fontSize: FontSizes.bodyMedium,
     color: Colors.textSecondary,
   },
-  formSection: {
-    marginBottom: Spacing.xl,
+
+  // Form
+  formContainer: {
+    marginBottom: Spacing.lg,
   },
   formTitle: {
     fontSize: FontSizes.headlineSmall,
     fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   formSubtitle: {
-    fontSize: FontSizes.bodyMedium,
+    fontSize: FontSizes.bodySmall,
     color: Colors.textSecondary,
     marginBottom: Spacing.lg,
   },
-  errorContainer: {
+
+  errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.error + '15',
-    borderLeftWidth: 4,
+    backgroundColor: Colors.error + '12',
+    borderLeftWidth: 3,
     borderLeftColor: Colors.error,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.medium,
     marginBottom: Spacing.lg,
+    gap: Spacing.sm,
   },
   errorText: {
     flex: 1,
     fontSize: FontSizes.bodySmall,
     color: Colors.error,
-    marginLeft: Spacing.md,
+    fontWeight: '500',
   },
-  forgotPasswordContainer: {
+
+  inputGroup: {
+    marginBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+
+  forgotLink: {
     alignItems: 'flex-end',
     marginBottom: Spacing.lg,
   },
-  forgotPasswordText: {
+  forgotText: {
     fontSize: FontSizes.bodySmall,
     color: Colors.primary,
     fontWeight: '500',
   },
+
   loginButton: {
-    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
   },
-  signupSection: {
+
+  // Footer
+  footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: Spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: Colors.gray100,
   },
-  signupText: {
-    fontSize: FontSizes.bodyMedium,
+  footerText: {
+    fontSize: FontSizes.bodySmall,
     color: Colors.textSecondary,
   },
   signupLink: {
-    fontSize: FontSizes.bodyMedium,
+    fontSize: FontSizes.bodySmall,
     color: Colors.primary,
     fontWeight: '600',
   },

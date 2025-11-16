@@ -15,7 +15,7 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
-import { Header, Card } from '../../components';
+import { Card } from '../../components';
 
 interface Notification {
   id: string;
@@ -182,7 +182,7 @@ export const NotificationsScreen: React.FC = () => {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.headerContainer}>
-        <Header title="Notifications" />
+        <Text style={styles.screenTitle}>Notifications</Text>
         {unreadCount > 0 && (
           <TouchableOpacity
             onPress={handleMarkAllAsRead}
@@ -233,12 +233,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   headerContainer: {
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray200,
+    backgroundColor: Colors.background,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  screenTitle: {
+    fontSize: FontSizes.headlineSmall,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
   },
   markAllButton: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: 0,
     paddingVertical: Spacing.md,
     borderTopWidth: 1,
     borderTopColor: Colors.gray200,

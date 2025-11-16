@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
     paddingTop: Spacing.sm,
     paddingHorizontal: Spacing.sm,
-    height: 60,
+    height: 70,
     elevation: 8,
     shadowColor: Colors.black,
     shadowOffset: { width: 0, height: -2 },
@@ -46,11 +46,12 @@ const styles = StyleSheet.create({
   },
   tabBarLabel: {
     fontSize: FontSizes.labelSmall,
-    marginTop: Spacing.xs,
+    marginTop: 2,
     fontWeight: '500',
+    marginBottom: 0,
   },
   tabBarIcon: {
-    marginBottom: Spacing.xs,
+    marginBottom: 0,
   },
 });
 

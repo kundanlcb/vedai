@@ -3,17 +3,17 @@
  */
 
 export const Colors = {
-  // Primary colors
-  primary: '#6200EE',
-  primaryLight: '#8C4FED',
-  primaryDark: '#3700B3',
+  // Primary colors - Theme 2: Deep Orange + Teal (Energetic & Engaging)
+  primary: '#FF5722',
+  primaryLight: '#FF8A65',
+  primaryDark: '#E64A19',
 
-  // Secondary colors
-  secondary: '#03DAC6',
-  secondaryLight: '#66FFF9',
-  secondaryDark: '#018786',
+  // Secondary colors - Complementary Teal
+  secondary: '#00BCD4',
+  secondaryLight: '#4DD0E1',
+  secondaryDark: '#0097A7',
 
-  // Neutral colors
+  // ...existing code...
   white: '#FFFFFF',
   black: '#000000',
 
@@ -28,11 +28,11 @@ export const Colors = {
   gray200: '#EEEEEE',
   gray100: '#F5F5F5',
 
-  // Status colors
-  success: '#4CAF50',
-  error: '#F44336',
-  warning: '#FFC107',
-  info: '#2196F3',
+  // Status colors - More vibrant
+  success: '#26A69A',
+  error: '#EF5350',
+  warning: '#FF6F00',
+  info: '#0288D1',
 
   // Semantic colors
   background: '#FAFAFA',
@@ -47,15 +47,15 @@ export const Colors = {
 };
 
 export const DarkColors = {
-  primary: '#BB86FC',
-  primaryLight: '#F6F6F6',
-  primaryDark: '#3700B3',
+  primary: '#FF8A65',
+  primaryLight: '#FFAB91',
+  primaryDark: '#D84315',
 
-  secondary: '#03DAC6',
-  secondaryLight: '#66FFF9',
-  secondaryDark: '#018786',
+  secondary: '#4DD0E1',
+  secondaryLight: '#80DEEA',
+  secondaryDark: '#0097A7',
 
-  white: '#FFFFFF',
+  // ...existing code...
   black: '#000000',
 
   gray900: '#121212',
@@ -68,10 +68,10 @@ export const DarkColors = {
   gray200: '#7A7A7A',
   gray100: '#8A8A8A',
 
-  success: '#81C784',
-  error: '#EF5350',
-  warning: '#FFB74D',
-  info: '#64B5F6',
+  success: '#4DB8A8',
+  error: '#FF6E6E',
+  warning: '#FFA500',
+  info: '#4FC3F7',
 
   background: '#121212',
   surface: '#1F1F1F',
