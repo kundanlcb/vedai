@@ -11,10 +11,10 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  TextInput,
+  Modal,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
 import { Card } from '../../components';
 
@@ -34,9 +34,24 @@ interface TestItem {
 // Separator component
 const ItemSeparator = () => <View style={styles.separator} />;
 
+type SortOption = 'default' | 'subject' | 'date' | 'status';
+type FilterStatus = 'all' | 'pending' | 'completed';
+
+interface FilterState {
+  status: FilterStatus;
+  subjects: string[];
+}
+
 export const ExamsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [filters, setFilters] = useState<FilterState>({
+    status: 'all',
+    subjects: [],
+  });
+
+  const allSubjects = ['Mathematics', 'Science', 'English', 'Social Studies'];
 
   // Sort: pending first, then completed
   const sortedTests = useMemo(() => {
@@ -108,23 +123,50 @@ export const ExamsScreen: React.FC = () => {
       },
     ];
 
-    return [...allTests].sort((a, b) => {
-      if (a.status === 'pending' && b.status !== 'pending') return -1;
-      if (a.status !== 'pending' && b.status === 'pending') return 1;
-      if (a.status === 'pending' && b.status === 'pending') {
-        return (a.daysLeft || 999) - (b.daysLeft || 999);
-      }
-      return 0;
-    });
-  }, []);
+    let sorted = [...allTests];
+
+    // Apply filters
+    if (filters.status !== 'all') {
+      sorted = sorted.filter((t) => t.status === filters.status);
+    }
+
+    if (filters.subjects.length > 0) {
+      sorted = sorted.filter((t) => filters.subjects.includes(t.subject));
+    }
+
+    // Apply sorting
+    if (sortBy === 'subject') {
+      sorted.sort((a, b) => a.subject.localeCompare(b.subject));
+    } else if (sortBy === 'date') {
+      sorted.sort((a, b) => {
+        const daysA = a.daysLeft || 999;
+        const daysB = b.daysLeft || 999;
+        return daysA - daysB;
+      });
+    } else if (sortBy === 'status') {
+      sorted.sort((a, b) => {
+        if (a.status === 'pending' && b.status !== 'pending') return -1;
+        if (a.status !== 'pending' && b.status === 'pending') return 1;
+        return 0;
+      });
+    } else {
+      // default: pending first, then completed
+      sorted.sort((a, b) => {
+        if (a.status === 'pending' && b.status !== 'pending') return -1;
+        if (a.status !== 'pending' && b.status === 'pending') return 1;
+        if (a.status === 'pending' && b.status === 'pending') {
+          return (a.daysLeft || 999) - (b.daysLeft || 999);
+        }
+        return 0;
+      });
+    }
+
+    return sorted;
+  }, [sortBy, filters]);
 
   const filteredTests = useMemo(() => {
-    return sortedTests.filter(
-      (test) =>
-        test.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        test.subject.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, sortedTests]);
+    return sortedTests;
+  }, [sortedTests]);
 
   const renderTestCard = ({ item }: { item: TestItem }) => {
     const isPending = item.status === 'pending';
@@ -143,7 +185,7 @@ export const ExamsScreen: React.FC = () => {
           variant="filled"
           style={[
             styles.testCard,
-            { borderLeftColor: cardColor, borderLeftWidth: 4 }
+            { borderLeftColor: cardColor }
           ]}
         >
           {/* Header with Title and Badge */}
@@ -218,38 +260,37 @@ export const ExamsScreen: React.FC = () => {
       </TouchableOpacity>
     );
   };
-    filteredTests.filter((t) => t.status === 'pending').length;
-    filteredTests.filter((t) => t.status === 'completed').length;
-    return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.titleBar}>
-        <Text style={styles.screenTitle}>Tests</Text>
-      </View>
 
-      {/* Search */}
-      <View style={styles.searchContainer}>
-        <MaterialIcons
-          name="search"
-          size={20}
-          color={Colors.textSecondary}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search tests..."
-          placeholderTextColor={Colors.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery !== '' && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Header with Title and Controls */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.screenTitle}>Tests</Text>
+        <View style={styles.headerControls}>
+          {/* Sort Button */}
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => setFilterModalVisible(true)}
+          >
             <MaterialIcons
-              name="close"
-              size={20}
-              color={Colors.textSecondary}
+              name="tune"
+              size={24}
+              color={Colors.textPrimary}
             />
           </TouchableOpacity>
-        )}
+
+          {/* Filter Button */}
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => setFilterModalVisible(true)}
+          >
+            <MaterialIcons
+              name="filter-list"
+              size={24}
+              color={Colors.textPrimary}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
 
@@ -279,6 +320,128 @@ export const ExamsScreen: React.FC = () => {
           )}
         </View>
       </ScrollView>
+
+      {/* Filter Modal */}
+      <Modal
+        visible={filterModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setFilterModalVisible(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Sort & Filter</Text>
+            <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+              <MaterialIcons
+                name="close"
+                size={24}
+                color={Colors.textPrimary}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            {/* Sort Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Sort By</Text>
+              {(['default', 'subject', 'date', 'status'] as const).map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={styles.filterOption}
+                  onPress={() => {
+                    setSortBy(option);
+                  }}
+                >
+                  <View style={styles.filterOptionContent}>
+                    <Text style={styles.filterOptionText}>
+                      {option.charAt(0).toUpperCase() + option.slice(1)}
+                    </Text>
+                  </View>
+                  {sortBy === option && (
+                    <MaterialIcons
+                      name="check"
+                      size={20}
+                      color={Colors.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Status Filter Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Status</Text>
+              {(['all', 'pending', 'completed'] as const).map((status) => (
+                <TouchableOpacity
+                  key={status}
+                  style={styles.filterOption}
+                  onPress={() => {
+                    setFilters({ ...filters, status });
+                  }}
+                >
+                  <View style={styles.filterOptionContent}>
+                    <Text style={styles.filterOptionText}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </Text>
+                  </View>
+                  {filters.status === status && (
+                    <MaterialIcons
+                      name="check"
+                      size={20}
+                      color={Colors.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Subject Filter Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Subjects</Text>
+              {allSubjects.map((subject) => (
+                <TouchableOpacity
+                  key={subject}
+                  style={styles.filterOption}
+                  onPress={() => {
+                    setFilters((prev) => {
+                      const isSelected = prev.subjects.includes(subject);
+                      return {
+                        ...prev,
+                        subjects: isSelected
+                          ? prev.subjects.filter((s) => s !== subject)
+                          : [...prev.subjects, subject],
+                      };
+                    });
+                  }}
+                >
+                  <View style={styles.filterOptionContent}>
+                    <Text style={styles.filterOptionText}>{subject}</Text>
+                  </View>
+                  {filters.subjects.includes(subject) && (
+                    <MaterialIcons
+                      name="check"
+                      size={20}
+                      color={Colors.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Reset Filters Button */}
+            <TouchableOpacity
+              style={styles.resetButton}
+              onPress={() => {
+                setSortBy('default');
+                setFilters({ status: 'all', subjects: [] });
+              }}
+            >
+              <Text style={styles.resetButtonText}>Reset Filters</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 };
@@ -290,7 +453,10 @@ const styles = StyleSheet.create({
   },
 
   // Header
-  titleBar: {
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     paddingBottom: Spacing.lg,
@@ -300,25 +466,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.textPrimary,
   },
-
-  // Search
-  searchContainer: {
+  headerControls: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.lg,
-    paddingHorizontal: Spacing.md,
-    backgroundColor: Colors.white,
-    borderRadius: BorderRadius.large,
-    borderWidth: 1,
-    borderColor: Colors.gray100,
-    gap: Spacing.sm,
+    gap: Spacing.md,
   },
-  searchInput: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    fontSize: FontSizes.bodyMedium,
-    color: Colors.textPrimary,
+  controlButton: {
+    padding: Spacing.sm,
   },
 
 
@@ -337,6 +490,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
     backgroundColor: Colors.white,
+    borderLeftWidth: 4,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -463,6 +617,70 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.bodyMedium,
     color: Colors.textSecondary,
     marginTop: Spacing.md,
+  },
+
+  // Modal
+  modalContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray100,
+  },
+  modalTitle: {
+    fontSize: FontSizes.headlineSmall,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  section: {
+    marginBottom: Spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: FontSizes.bodyMedium,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.md,
+  },
+  filterOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.medium,
+    marginBottom: Spacing.sm,
+  },
+  filterOptionContent: {
+    flex: 1,
+  },
+  filterOptionText: {
+    fontSize: FontSizes.bodyMedium,
+    color: Colors.textPrimary,
+  },
+  resetButton: {
+    marginVertical: Spacing.lg,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.medium,
+    alignItems: 'center',
+  },
+  resetButtonText: {
+    fontSize: FontSizes.bodyMedium,
+    fontWeight: '700',
+    color: Colors.white,
   },
 });
 

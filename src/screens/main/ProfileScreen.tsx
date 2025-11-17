@@ -31,6 +31,14 @@ export const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuth();
   const [notifications, setNotifications] = React.useState(true);
 
+  // Ensure name is always visible: prefer user's name; otherwise use email prefix; fallback to 'Student'
+  const displayName = React.useMemo(() => {
+    const trimmed = user?.name?.trim();
+    if (trimmed) return trimmed;
+    const emailPrefix = user?.email?.split?.('@')?.[0]?.trim();
+    return emailPrefix && emailPrefix.length > 0 ? emailPrefix : 'Student';
+  }, [user?.name, user?.email]);
+
   const handleLogout = () => {
     Alert.alert(
       'Sign Out',
@@ -127,14 +135,13 @@ export const ProfileScreen: React.FC = () => {
                 />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.name}>{user?.name}</Text>
-                <Text style={styles.class}>Student • Class 10</Text>
-                <Text style={styles.email}>{user?.email}</Text>
+                <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{displayName}</Text>
+                <Text style={styles.class}>Class 10 • Student</Text>
               </View>
               <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
                 <MaterialIcons
                   name="edit"
-                  size={20}
+                  size={18}
                   color={Colors.white}
                 />
               </TouchableOpacity>
@@ -142,24 +149,39 @@ export const ProfileScreen: React.FC = () => {
           </Card>
         </View>
 
-        {/* Stats */}
+        {/* Stats Tiles */}
         <View style={styles.statsGrid}>
           <Card variant="filled" style={styles.statCard}>
-            <View style={styles.statContent}>
-              <Text style={styles.statValue}>12</Text>
-              <Text style={styles.statLabel}>Chapters</Text>
+            <View style={styles.statItem}>
+              <MaterialIcons
+                name="trending-up"
+                size={24}
+                color={Colors.success}
+              />
+              <Text style={styles.statLabel}>Progress</Text>
+              <Text style={styles.statValue}>78%</Text>
             </View>
           </Card>
           <Card variant="filled" style={styles.statCard}>
-            <View style={styles.statContent}>
+            <View style={styles.statItem}>
+              <MaterialIcons
+                name="star"
+                size={24}
+                color={Colors.warning}
+              />
+              <Text style={styles.statLabel}>Performance</Text>
               <Text style={styles.statValue}>85%</Text>
-              <Text style={styles.statLabel}>Average</Text>
             </View>
           </Card>
           <Card variant="filled" style={styles.statCard}>
-            <View style={styles.statContent}>
-              <Text style={styles.statValue}>24h</Text>
-              <Text style={styles.statLabel}>This Week</Text>
+            <View style={styles.statItem}>
+              <MaterialIcons
+                name="local-fire"
+                size={24}
+                color={Colors.error}
+              />
+              <Text style={styles.statLabel}>Streak</Text>
+              <Text style={styles.statValue}>12</Text>
             </View>
           </Card>
         </View>
@@ -256,72 +278,72 @@ const styles = StyleSheet.create({
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    gap: Spacing.md,
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: Colors.primary + '15',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: Spacing.lg,
   },
   profileInfo: {
     flex: 1,
   },
   name: {
     fontSize: FontSizes.titleMedium,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.textPrimary,
     marginBottom: Spacing.xs,
   },
   class: {
     fontSize: FontSizes.bodySmall,
     color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  email: {
-    fontSize: FontSizes.bodySmall,
-    color: Colors.primary,
-    fontWeight: '500',
   },
   editButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.primary,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.medium,
+    justifyContent: 'center',
     alignItems: 'center',
-  },
-  editButtonText: {
-    fontSize: FontSizes.bodySmall,
-    fontWeight: '600',
-    color: Colors.white,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 5,
   },
 
   // Stats
   statsGrid: {
     flexDirection: 'row',
     paddingHorizontal: Spacing.lg,
-    gap: Spacing.sm,
+    gap: Spacing.md,
     marginBottom: Spacing.lg,
   },
   statCard: {
     flex: 1,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.sm,
   },
-  statContent: {
+  statItem: {
     alignItems: 'center',
+    gap: Spacing.sm,
   },
   statValue: {
     fontSize: FontSizes.headlineMedium,
     fontWeight: '700',
     color: Colors.primary,
-    marginBottom: Spacing.xs,
+    marginTop: Spacing.xs,
   },
   statLabel: {
     fontSize: FontSizes.labelSmall,
     color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  statContent: {
+    alignItems: 'center',
   },
 
   // Section
@@ -407,4 +429,3 @@ const styles = StyleSheet.create({
     color: Colors.textTertiary,
   },
 });
-

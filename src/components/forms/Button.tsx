@@ -117,43 +117,60 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: Spacing.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 
   // Variants
   primaryContainer: {
     backgroundColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.3,
   },
   secondaryContainer: {
     backgroundColor: Colors.secondary,
+    shadowColor: Colors.secondary,
+    shadowOpacity: 0.3,
   },
   outlinedContainer: {
     backgroundColor: Colors.white,
     borderWidth: 2,
     borderColor: Colors.primary,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
   },
   textContainer: {
     backgroundColor: 'transparent',
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    elevation: 0,
   },
 
   // Sizes
   smallContainer: {
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
+    minHeight: 40,
   },
   mediumContainer: {
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
+    minHeight: 48,
   },
   largeContainer: {
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.xl,
+    minHeight: 56,
   },
 
   // Disabled state
   disabledContainer: {
-    opacity: 0.5,
+    opacity: 0.6,
   },
   disabledText: {
     color: Colors.gray400,
@@ -162,7 +179,7 @@ const styles = StyleSheet.create({
   // Text styles
   text: {
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   primaryText: {
     color: Colors.white,

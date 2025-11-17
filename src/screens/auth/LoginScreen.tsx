@@ -31,6 +31,9 @@ interface LoginFormData {
   password: string;
 }
 
+// TODO: Change this to false to enable validation after testing
+const DISABLE_VALIDATION = true;
+
 export const LoginScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { login } = useAuth();
@@ -45,25 +48,30 @@ export const LoginScreen: React.FC = () => {
   );
 
   const handleLogin = async () => {
-    const emailError = validateEmail(form.values.email);
-    const passwordError = validatePassword(form.values.password);
+    // Validation can be disabled for testing by changing DISABLE_VALIDATION flag
+    if (!DISABLE_VALIDATION) {
+      const emailError = validateEmail(form.values.email);
+      const passwordError = validatePassword(form.values.password);
 
-    if (emailError) {
-      form.setError('email', emailError);
-    }
-    if (passwordError) {
-      form.setError('password', passwordError);
-    }
-
-    if (!emailError && !passwordError) {
-      form.setSubmitting(true);
-      try {
-        await login(form.values.email, form.values.password);
-      } catch {
-        setLoginError('Login failed. Please try again.');
-      } finally {
-        form.setSubmitting(false);
+      if (emailError) {
+        form.setError('email', emailError);
       }
+      if (passwordError) {
+        form.setError('password', passwordError);
+      }
+
+      if (emailError || passwordError) {
+        return;
+      }
+    }
+
+    form.setSubmitting(true);
+    try {
+      await login(form.values.email, form.values.password);
+    } catch {
+      setLoginError('Login failed. Please try again.');
+    } finally {
+      form.setSubmitting(false);
     }
   };
 
@@ -254,6 +262,7 @@ const styles = StyleSheet.create({
 
   loginButton: {
     marginBottom: Spacing.md,
+    marginTop: Spacing.lg,
   },
 
   // Footer
