@@ -16,7 +16,6 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
-import { Card } from '../../components';
 
 interface Message {
   id: string;
@@ -385,4 +384,3 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
 });
-

@@ -12,18 +12,18 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Colors, Spacing, FontSizes } from '../constants';
 import {
-  HomeScreen,
-  ExamsScreen,
-  ProfileScreen,
   ChatScreen,
   NotificationsScreen,
 } from '../screens';
+import { HomeNavigator } from './HomeNavigator';
+import { TestsNavigator } from './TestsNavigator';
+import { ProfileNavigator } from './ProfileNavigator';
 
 export type BottomTabParamList = {
   HomeTab: undefined;
-  ExamsTab: undefined;
+  ExamTab: undefined;
   ChatTab: undefined;
-  NotificationsTab: undefined;
+  NotificationTab: undefined;
   ProfileTab: undefined;
 };
 
@@ -64,7 +64,26 @@ const screenOptions: BottomTabNavigationOptions = {
   tabBarIconStyle: styles.tabBarIcon,
 };
 
-// Icon components memoized to prevent re-renders
+// Icon renderers - extracted to prevent unstable nested component warnings
+const HomeIcon = ({ color, size }: { color: string; size: number }) => (
+  <MaterialIcons name="home" color={color} size={size} />
+);
+
+const ExamIcon = ({ color, size }: { color: string; size: number }) => (
+  <MaterialIcons name="assignment" color={color} size={size} />
+);
+
+const ChatIcon = ({ color, size }: { color: string; size: number }) => (
+  <MaterialIcons name="chat-bubble" color={color} size={size} />
+);
+
+const NotificationIcon = ({ color, size }: { color: string; size: number }) => (
+  <MaterialIcons name="notifications" color={color} size={size} />
+);
+
+const ProfileIcon = ({ color, size }: { color: string; size: number }) => (
+  <MaterialIcons name="person" color={color} size={size} />
+);
 
 export const BottomTabNavigator: React.FC = () => {
   return (
@@ -74,24 +93,20 @@ export const BottomTabNavigator: React.FC = () => {
       {/* Home Tab */}
       <Tab.Screen
         name="HomeTab"
-        component={HomeScreen}
+        component={HomeNavigator}
         options={{
           tabBarLabel: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" color={color} size={size} />
-          ),
+          tabBarIcon: HomeIcon,
         }}
       />
 
-      {/* Exams Tab */}
+      {/* Exam Tab */}
       <Tab.Screen
-        name="ExamsTab"
-        component={ExamsScreen}
+        name="ExamTab"
+        component={TestsNavigator}
         options={{
-          tabBarLabel: 'Exams',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="assignment" color={color} size={size} />
-          ),
+          tabBarLabel: 'Exam',
+          tabBarIcon: ExamIcon,
         }}
       />
 
@@ -101,33 +116,27 @@ export const BottomTabNavigator: React.FC = () => {
         component={ChatScreen}
         options={{
           tabBarLabel: 'Chat',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="message" color={color} size={size} />
-          ),
+          tabBarIcon: ChatIcon,
         }}
       />
 
-      {/* Notifications Tab */}
+      {/* Notification Tab */}
       <Tab.Screen
-        name="NotificationsTab"
+        name="NotificationTab"
         component={NotificationsScreen}
         options={{
-          tabBarLabel: 'Alerts',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="notifications" color={color} size={size} />
-          ),
+          tabBarLabel: 'Notification',
+          tabBarIcon: NotificationIcon,
         }}
       />
 
       {/* Profile Tab */}
       <Tab.Screen
         name="ProfileTab"
-        component={ProfileScreen}
+        component={ProfileNavigator}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="person" color={color} size={size} />
-          ),
+          tabBarIcon: ProfileIcon,
         }}
       />
     </Tab.Navigator>

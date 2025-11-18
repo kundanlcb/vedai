@@ -11,7 +11,10 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
+  Image,
+  Animated,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
@@ -48,6 +51,7 @@ interface DailyGoal {
 export const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const navigation = useNavigation<any>();
   const [dailyGoals] = useState<DailyGoal[]>([
     {
       id: '1',
@@ -159,46 +163,89 @@ export const HomeScreen: React.FC = () => {
     }
   };
 
-  const renderDailyGoal = ({ item }: { item: DailyGoal }) => {
+  const renderDailyGoal = ({ item, index }: { item: DailyGoal; index: number }) => {
     const progress = item.current / item.target;
     const isCompleted = progress >= 1;
+    const isFirstCard = index === 0;
 
+    if (isFirstCard) {
+      return (
+        <Card variant="filled" style={styles.goalCard}>
+          <View style={styles.goalHeader}>
+            <View style={[styles.goalIcon, { backgroundColor: item.color + '20' }]}>
+              <MaterialIcons
+                name={item.icon as any}
+                size={20}
+                color={item.color}
+              />
+            </View>
+            <View style={styles.goalInfo}>
+              <Text style={styles.goalLabel}>{item.label}</Text>
+              <Text style={styles.goalProgress}>
+                {item.current}/{item.target} {item.unit}
+              </Text>
+            </View>
+            {isCompleted && (
+              <MaterialIcons
+                name="check-circle"
+                size={24}
+                color={Colors.success}
+              />
+            )}
+          </View>
+          <View style={styles.progressBarContainer}>
+            <View
+              style={[
+                styles.progressBar,
+                {
+                  width: `${Math.min(progress * 100, 100)}%`,
+                  backgroundColor: isCompleted ? Colors.success : item.color,
+                },
+              ]}
+            />
+          </View>
+        </Card>
+      );
+    }
+
+    // Circular tile for remaining goals
     return (
-      <Card variant="filled" style={styles.goalCard}>
-        <View style={styles.goalHeader}>
-          <View style={[styles.goalIcon, { backgroundColor: item.color + '20' }]}>
+      <View style={styles.circularGoalTile}>
+        <View style={styles.circularGoalProgressContainer}>
+          {/* Background circle with light color */}
+          <View
+            style={[
+              styles.circularGoalProgressBg,
+              { borderColor: item.color + '30', backgroundColor: item.color + '10' },
+            ]}
+          />
+
+          {/* Progress arc overlay - only bottom */}
+          <Animated.View
+            style={[
+              styles.circularGoalProgress,
+              {
+                borderBottomColor: item.color,
+                transform: [
+                  {
+                    rotate: `${progress * 360}deg`,
+                  },
+                ],
+              },
+            ]}
+          />
+
+          {/* Center content */}
+          <View style={styles.circularGoalContentCenter}>
             <MaterialIcons
               name={item.icon as any}
               size={20}
               color={item.color}
             />
           </View>
-          <View style={styles.goalInfo}>
-            <Text style={styles.goalLabel}>{item.label}</Text>
-            <Text style={styles.goalProgress}>
-              {item.current}/{item.target} {item.unit}
-            </Text>
-          </View>
-          {isCompleted && (
-            <MaterialIcons
-              name="check-circle"
-              size={24}
-              color={Colors.success}
-            />
-          )}
         </View>
-        <View style={styles.progressBarContainer}>
-          <View
-            style={[
-              styles.progressBar,
-              {
-                width: `${Math.min(progress * 100, 100)}%`,
-                backgroundColor: isCompleted ? Colors.success : item.color,
-              },
-            ]}
-          />
-        </View>
-      </Card>
+        <Text style={styles.circularGoalLabel}>{item.label}</Text>
+      </View>
     );
   };
 
@@ -206,6 +253,7 @@ export const HomeScreen: React.FC = () => {
     <TouchableOpacity
       style={styles.subjectTile}
       activeOpacity={0.7}
+      onPress={() => navigation.navigate('SubjectDetail', { subject: item })}
     >
       <View style={[styles.subjectIcon, { backgroundColor: item.color + '18' }]}>
         <MaterialIcons
@@ -228,6 +276,7 @@ export const HomeScreen: React.FC = () => {
     <TouchableOpacity
       style={[styles.bankCard, { borderLeftColor: item.color, borderLeftWidth: 4 }]}
       activeOpacity={0.7}
+      onPress={() => navigation.navigate('QuestionBankDetail', { questionBank: item })}
     >
       <View style={styles.bankHeader}>
         <Text style={styles.bankSubject}>{item.subject}</Text>
@@ -263,36 +312,61 @@ export const HomeScreen: React.FC = () => {
       >
         {/* Greeting Section */}
         <View style={styles.greetingSection}>
-          <Text style={styles.greeting}>
-            {getGreeting()}, {user?.name?.split(' ')[0]}!
-          </Text>
-          <Text style={styles.encouragement}>
-            Stay consistent with your daily goals 🎯
-          </Text>
+          <View style={styles.greetingContainer}>
+            <View style={styles.profilePicture}>
+              {user?.profileImage ? (
+                <Image
+                  source={{ uri: user.profileImage }}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <Text style={styles.profileInitial}>
+                  {user?.name?.charAt(0).toUpperCase() || 'S'}
+                </Text>
+              )}
+            </View>
+            <View style={styles.greetingText}>
+              <Text style={styles.greeting}>
+                {getGreeting()}, {user?.name?.split(' ')[0]}!
+              </Text>
+              <Text style={styles.encouragement}>
+                Stay consistent with your daily goals 🎯
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Daily Progress Tracker */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Today's Goals</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('ProfileTab')}>
               <Text style={styles.seeAll}>Edit</Text>
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={dailyGoals}
-            renderItem={renderDailyGoal}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
-          />
+          {/* First goal card */}
+          {dailyGoals.length > 0 && renderDailyGoal({ item: dailyGoals[0], index: 0 })}
+
+          {/* Remaining goals in horizontal row */}
+          {dailyGoals.length > 1 && (
+            <View style={styles.horizontalGoalsRow}>
+              <FlatList
+                data={dailyGoals.slice(1)}
+                renderItem={({ item, index }) => renderDailyGoal({ item, index: index + 1 })}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+              />
+            </View>
+          )}
         </View>
 
         {/* Subjects */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Subjects</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('ExamTab')}>
               <Text style={styles.seeAll}>Browse all</Text>
             </TouchableOpacity>
           </View>
@@ -310,7 +384,7 @@ export const HomeScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Practice Question Banks</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('ExamTab')}>
               <Text style={styles.seeAll}>All</Text>
             </TouchableOpacity>
           </View>
@@ -345,6 +419,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     paddingBottom: Spacing.lg,
+  },
+  greetingContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+  },
+  profilePicture: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    marginTop: Spacing.xs,
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 28,
+  },
+  profileInitial: {
+    fontSize: FontSizes.headlineSmall,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+  greetingText: {
+    flex: 1,
   },
   greeting: {
     fontSize: FontSizes.headlineSmall,
@@ -399,6 +501,93 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 3,
   },
+  horizontalGoalCard: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: 0,
+    marginBottom: 0,
+    overflow: 'hidden',
+  },
+  horizontalGoalContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: Spacing.md,
+    gap: Spacing.md,
+  },
+  horizontalGoalInfo: {
+    flex: 1,
+  },
+  horizontalProgressBarContainer: {
+    height: 4,
+    backgroundColor: Colors.gray200,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+
+  // Circular Goal Tiles
+  horizontalGoalsRow: {
+    marginTop: Spacing.md,
+    marginHorizontal: -Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+  },
+  circularGoalTile: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.sm,
+    minWidth: 90,
+  },
+  circularGoalProgressContainer: {
+    width: 64,
+    height: 64,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+    position: 'relative',
+  },
+  circularGoalProgressBg: {
+    position: 'absolute',
+    width: 64,
+    height: 64,
+    borderWidth: 2,
+    borderRadius: 32,
+    borderColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circularGoalProgress: {
+    position: 'absolute',
+    width: 64,
+    height: 64,
+    borderWidth: 2,
+    borderRadius: 32,
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+    borderLeftColor: 'transparent',
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circularGoalContentCenter: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    borderWidth: 1,
+    borderColor: Colors.gray100,
+  },
+  circularGoalLabel: {
+    fontSize: FontSizes.labelSmall,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
+    maxWidth: 90,
+  },
 
   // Section
   section: {
@@ -434,6 +623,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.medium,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.sm,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.lg,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.gray100,

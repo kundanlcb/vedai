@@ -176,7 +176,7 @@ export const ProfileScreen: React.FC = () => {
           <Card variant="filled" style={styles.statCard}>
             <View style={styles.statItem}>
               <MaterialIcons
-                name="local-fire"
+                name="whatshot"
                 size={24}
                 color={Colors.error}
               />
