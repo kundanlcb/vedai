@@ -13,6 +13,7 @@ import {
   Switch,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
@@ -28,6 +29,7 @@ interface MenuItem {
 
 export const ProfileScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
   const { user, logout } = useAuth();
   const [notifications, setNotifications] = React.useState(true);
 
@@ -63,25 +65,31 @@ export const ProfileScreen: React.FC = () => {
       id: '1',
       icon: 'edit',
       label: 'Edit Profile',
-      onPress: () => {},
+      onPress: () => navigation.navigate('ProfileEdit'),
     },
     {
       id: '2',
       icon: 'lock',
       label: 'Change Password',
-      onPress: () => {},
+      onPress: () => {
+        Alert.alert('Change Password', 'Feature coming soon');
+      },
     },
     {
       id: '3',
       icon: 'help',
       label: 'Help & Support',
-      onPress: () => {},
+      onPress: () => {
+        Alert.alert('Help & Support', 'Feature coming soon');
+      },
     },
     {
       id: '4',
       icon: 'info',
       label: 'About VedAI',
-      onPress: () => {},
+      onPress: () => {
+        Alert.alert('About VedAI', 'VEDAI Student Learning Platform v1.0.0\n\nYour personal AI learning companion');
+      },
     },
   ];
 
@@ -138,7 +146,11 @@ export const ProfileScreen: React.FC = () => {
                 <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{displayName}</Text>
                 <Text style={styles.class}>Class 10 • Student</Text>
               </View>
-              <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={styles.editButton}
+                activeOpacity={0.7}
+                onPress={() => navigation.navigate('ProfileEdit')}
+              >
                 <MaterialIcons
                   name="edit"
                   size={18}
@@ -152,7 +164,11 @@ export const ProfileScreen: React.FC = () => {
         {/* Stats Tiles */}
         <View style={styles.statsGrid}>
           <Card variant="filled" style={styles.statCard}>
-            <View style={styles.statItem}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('ProgressDetails')}
+              style={styles.statItem}
+            >
               <MaterialIcons
                 name="trending-up"
                 size={24}
@@ -160,10 +176,14 @@ export const ProfileScreen: React.FC = () => {
               />
               <Text style={styles.statLabel}>Progress</Text>
               <Text style={styles.statValue}>78%</Text>
-            </View>
+            </TouchableOpacity>
           </Card>
           <Card variant="filled" style={styles.statCard}>
-            <View style={styles.statItem}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('ProgressDetails')}
+              style={styles.statItem}
+            >
               <MaterialIcons
                 name="star"
                 size={24}
@@ -171,10 +191,14 @@ export const ProfileScreen: React.FC = () => {
               />
               <Text style={styles.statLabel}>Performance</Text>
               <Text style={styles.statValue}>85%</Text>
-            </View>
+            </TouchableOpacity>
           </Card>
           <Card variant="filled" style={styles.statCard}>
-            <View style={styles.statItem}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('ProgressDetails')}
+              style={styles.statItem}
+            >
               <MaterialIcons
                 name="whatshot"
                 size={24}
@@ -182,7 +206,7 @@ export const ProfileScreen: React.FC = () => {
               />
               <Text style={styles.statLabel}>Streak</Text>
               <Text style={styles.statValue}>12</Text>
-            </View>
+            </TouchableOpacity>
           </Card>
         </View>
 
@@ -409,7 +433,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.error + '15',
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     borderRadius: BorderRadius.medium,
     gap: Spacing.sm,
   },

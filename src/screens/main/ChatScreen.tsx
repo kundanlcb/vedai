@@ -12,6 +12,8 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -136,7 +138,11 @@ export const ChatScreen: React.FC = () => {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={[styles.container, { paddingTop: insets.top }]}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
       {/* Minimal Header */}
       <View style={styles.titleBar}>
         <Text style={styles.screenTitle}>VedAI</Text>
@@ -197,7 +203,7 @@ export const ChatScreen: React.FC = () => {
         </View>
         <Text style={styles.hint}>Powered by AI • Always factual</Text>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

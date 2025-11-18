@@ -9,6 +9,7 @@ import {
   createBottomTabNavigator,
   BottomTabNavigationOptions,
 } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Colors, Spacing, FontSizes } from '../constants';
 import {
@@ -34,10 +35,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderTopWidth: 1,
     borderTopColor: Colors.gray200,
-    paddingBottom: Spacing.sm,
     paddingTop: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    height: 70,
+    paddingBottom: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    minHeight: 80,
     elevation: 8,
     shadowColor: Colors.black,
     shadowOffset: { width: 0, height: -2 },
@@ -46,9 +47,9 @@ const styles = StyleSheet.create({
   },
   tabBarLabel: {
     fontSize: FontSizes.labelSmall,
-    marginTop: 2,
+    marginTop: Spacing.sm,
     fontWeight: '500',
-    marginBottom: 0,
+    marginBottom: Spacing.xs,
   },
   tabBarIcon: {
     marginBottom: 0,
@@ -86,9 +87,22 @@ const ProfileIcon = ({ color, size }: { color: string; size: number }) => (
 );
 
 export const BottomTabNavigator: React.FC = () => {
+  const insets = useSafeAreaInsets();
+
+  const dynamicTabBarStyle = {
+    ...styles.tabBar,
+    minHeight: 80 + (insets.bottom || Spacing.lg),
+    paddingBottom: Spacing.md + (insets.bottom || Spacing.lg),
+  };
+
+  const dynamicScreenOptions: BottomTabNavigationOptions = {
+    ...screenOptions,
+    tabBarStyle: dynamicTabBarStyle,
+  };
+
   return (
     <Tab.Navigator
-      screenOptions={screenOptions}
+      screenOptions={dynamicScreenOptions}
     >
       {/* Home Tab */}
       <Tab.Screen

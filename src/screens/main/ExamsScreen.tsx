@@ -13,6 +13,7 @@ import {
   FlatList,
   Modal,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
@@ -44,6 +45,7 @@ interface FilterState {
 
 export const ExamsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [filters, setFilters] = useState<FilterState>({
@@ -180,7 +182,24 @@ export const ExamsScreen: React.FC = () => {
     const cardColor = subjectColors[item.subject] || Colors.primary;
 
     return (
-      <TouchableOpacity activeOpacity={0.7}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('ExamTab', {
+          screen: 'ExamDetail',
+          params: { exam: {
+            id: item.id,
+            name: item.title,
+            subject: item.subject,
+            duration: item.duration,
+            totalQuestions: item.questions,
+            passingScore: 60,
+            difficulty: 'medium',
+            description: `Test your knowledge on ${item.subject}`,
+            attempts: item.status === 'completed' ? 1 : undefined,
+            bestScore: item.percentage,
+          }}
+        })}
+      >
         <Card
           variant="filled"
           style={[

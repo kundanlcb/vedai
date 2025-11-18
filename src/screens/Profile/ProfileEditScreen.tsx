@@ -67,7 +67,10 @@ export const ProfileEditScreen: React.FC<{ navigation: any }> = ({ navigation })
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Picture Section */}
         <View style={styles.profilePictureSection}>
-          <TouchableOpacity style={styles.profilePictureButton}>
+          <TouchableOpacity
+            style={styles.profilePictureButton}
+            onPress={() => Alert.alert('Change Picture', 'Feature coming soon')}
+          >
             <View style={styles.profilePicture}>
               <Text style={styles.profileInitial}>K</Text>
             </View>
@@ -257,13 +260,28 @@ export const ProfileEditScreen: React.FC<{ navigation: any }> = ({ navigation })
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Account</Text>
           <Card variant="filled">
-            <TouchableOpacity style={styles.dangerButton}>
+            <TouchableOpacity
+              style={styles.dangerButton}
+              onPress={() => Alert.alert('Change Password', 'Feature coming soon')}
+            >
               <MaterialIcons name="lock" size={20} color={Colors.error} />
               <Text style={styles.dangerButtonText}>Change Password</Text>
               <MaterialIcons name="arrow-forward" size={20} color={Colors.error} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.dangerButton, styles.lastButton]}>
+            <TouchableOpacity
+              style={[styles.dangerButton, styles.lastButton]}
+              onPress={() => {
+                Alert.alert(
+                  'Delete Account',
+                  'Are you sure? This action cannot be undone.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Delete', style: 'destructive', onPress: () => {} }
+                  ]
+                );
+              }}
+            >
               <MaterialIcons name="delete-outline" size={20} color={Colors.error} />
               <Text style={styles.dangerButtonText}>Delete Account</Text>
               <MaterialIcons name="arrow-forward" size={20} color={Colors.error} />
@@ -383,16 +401,17 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray200,
     borderRadius: BorderRadius.medium,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
+    minHeight: 48,
     fontSize: FontSizes.bodySmall,
     color: Colors.textPrimary,
     backgroundColor: Colors.white,
-    marginBottom: 0,
+    marginBottom: Spacing.md,
   },
   bioInput: {
     textAlignVertical: 'top',
-    paddingTop: Spacing.md,
-    minHeight: 100,
+    minHeight: 120,
+    paddingVertical: Spacing.md,
   },
   selectContainer: {
     position: 'relative',

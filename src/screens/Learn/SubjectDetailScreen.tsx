@@ -24,7 +24,11 @@ interface Chapter {
   lessonsCompleted: number;
   totalLessons: number;
   duration: number; // in minutes
+  topics?: string[];
 }
+
+// Separator component
+const ChapterSeparator = () => <View style={{ height: Spacing.md }} />;
 
 export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
   navigation,
@@ -42,6 +46,7 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
       lessonsCompleted: 5,
       totalLessons: 5,
       duration: 45,
+      topics: ['Overview', 'Fundamentals', 'Key Concepts'],
     },
     {
       id: 'ch2',
@@ -50,6 +55,7 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
       lessonsCompleted: 3,
       totalLessons: 4,
       duration: 60,
+      topics: ['Core Principles', 'Basic Methods', 'Practice Problems'],
     },
     {
       id: 'ch3',
@@ -58,6 +64,7 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
       lessonsCompleted: 2,
       totalLessons: 4,
       duration: 75,
+      topics: ['Advanced Topics', 'Theory', 'Applications'],
     },
     {
       id: 'ch4',
@@ -66,6 +73,7 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
       lessonsCompleted: 1,
       totalLessons: 4,
       duration: 60,
+      topics: ['Real-world Uses', 'Case Studies', 'Problem Solving'],
     },
     {
       id: 'ch5',
@@ -74,6 +82,7 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
       lessonsCompleted: 0,
       totalLessons: 3,
       duration: 45,
+      topics: ['Exercises', 'Mock Tests', 'Summary'],
     },
   ]);
 
@@ -86,53 +95,91 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
   };
 
   const renderChapter = ({ item }: { item: Chapter }) => (
-    <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('ContentViewer', { chapter: item })}>
-      <Card variant="filled" style={styles.chapterCard}>
-        {/* Chapter Header */}
-        <View style={styles.chapterHeader}>
-          <View style={styles.flex1}>
-            <Text style={styles.chapterName}>{item.name}</Text>
-            <Text style={styles.chapterMeta}>
-              {item.lessonsCompleted}/{item.totalLessons} lessons • {item.duration} min
-            </Text>
-          </View>
-          <View style={styles.progressCircle}>
-            <Text style={[styles.progressText, { color: getProgressColor(item.progress) }]}>
-              {item.progress}%
-            </Text>
+    <Card variant="filled" style={styles.chapterCard}>
+      {/* Chapter Header with Progress */}
+      <View style={styles.chapterTop}>
+        <View style={styles.flex1}>
+          <Text style={styles.chapterName} numberOfLines={2}>{item.name}</Text>
+          <View style={styles.chapterMetaRow}>
+            <View style={styles.metaItem}>
+              <MaterialIcons name="book" size={12} color={Colors.textSecondary} />
+              <Text style={styles.metaText}>{item.lessonsCompleted}/{item.totalLessons}</Text>
+            </View>
+            <View style={styles.metaItem}>
+              <MaterialIcons name="schedule" size={12} color={Colors.textSecondary} />
+              <Text style={styles.metaText}>{item.duration}m</Text>
+            </View>
           </View>
         </View>
-
-        {/* Progress Bar */}
-        <View style={styles.progressBarContainer}>
-          <View
-            style={[
-              styles.progressBar,
-              {
-                width: `${item.progress}%`,
-                backgroundColor: getProgressColor(item.progress),
-              },
-            ]}
-          />
+        <View style={[styles.progressCircle, { borderColor: getProgressColor(item.progress) }]}>
+          <Text style={[styles.progressText, { color: getProgressColor(item.progress) }]}>
+            {item.progress}%
+          </Text>
         </View>
+      </View>
 
-        {/* Action Button */}
+      {/* Progress Bar */}
+      <View style={styles.progressBarContainer}>
+        <View
+          style={[
+            styles.progressBar,
+            {
+              width: `${item.progress}%`,
+              backgroundColor: getProgressColor(item.progress),
+            },
+          ]}
+        />
+      </View>
+
+      {/* Topics */}
+      {item.topics && item.topics.length > 0 && (
+        <View style={styles.topicsSection}>
+          <Text style={styles.topicsSectionTitle}>Topics:</Text>
+          <View style={styles.topicsRow}>
+            {item.topics.slice(0, 2).map((topic, idx) => (
+              <View key={idx} style={styles.topicTag}>
+                <Text style={styles.topicText} numberOfLines={1}>{topic}</Text>
+              </View>
+            ))}
+            {item.topics.length > 2 && (
+              <Text style={styles.moreTopics}>+{item.topics.length - 2}</Text>
+            )}
+          </View>
+        </View>
+      )}
+
+      {/* Bottom Row - Status and Button */}
+      <View style={styles.chapterBottom}>
+        <View>
+          {item.progress === 100 ? (
+            <View style={styles.completedBadge}>
+              <MaterialIcons name="check-circle" size={14} color={Colors.success} />
+              <Text style={styles.completedText}>Completed</Text>
+            </View>
+          ) : (
+            <Text style={styles.statusText}>
+              {item.lessonsCompleted === 0 ? 'Not Started' : 'In Progress'}
+            </Text>
+          )}
+        </View>
         <TouchableOpacity
-          style={[styles.actionButton, item.progress === 100 && styles.actionButtonCompleted]}
+          style={styles.smallButton}
           activeOpacity={0.7}
-          onPress={() => navigation.navigate('ContentViewer', { chapter: item })}
+          onPress={() => navigation.navigate('ContentViewer', {
+            chapter: { ...item, subject: subject.name }
+          })}
         >
           <MaterialIcons
-            name={item.progress === 100 ? 'done-all' : 'play-arrow'}
-            size={16}
-            color={item.progress === 100 ? Colors.success : Colors.white}
+            name={item.progress === 100 ? 'replay' : 'play-arrow'}
+            size={14}
+            color={Colors.white}
           />
-          <Text style={[styles.actionButtonText, item.progress === 100 && styles.actionButtonTextCompleted]}>
-            {item.progress === 100 ? 'Completed' : 'Continue'}
+          <Text style={styles.smallButtonText}>
+            {item.progress === 100 ? 'Review' : 'Start'}
           </Text>
         </TouchableOpacity>
-      </Card>
-    </TouchableOpacity>
+      </View>
+    </Card>
   );
 
   const totalProgress = Math.round(
@@ -148,9 +195,9 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
         </TouchableOpacity>
         <View style={styles.flex1}>
           <Text style={styles.headerTitle}>{subject.name}</Text>
-          <Text style={styles.headerSubtitle}>{chapters.length} chapters</Text>
+          <Text style={styles.headerSubtitle}>{chapters.length} chapters • {chapters.reduce((sum, ch) => sum + ch.duration, 0)} min</Text>
         </View>
-        <View style={{ width: 24 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -161,7 +208,7 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
               <View style={[styles.subjectIconLarge, { backgroundColor: subject.color + '15' }]}>
                 <MaterialIcons name={subject.icon} size={40} color={subject.color} />
               </View>
-              <View style={styles.flex1}>
+              <View style={styles.overviewInfo}>
                 <Text style={styles.overviewTitle}>Overall Progress</Text>
                 <Text style={styles.overviewProgress}>{totalProgress}%</Text>
               </View>
@@ -183,22 +230,41 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
             {/* Stats */}
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <MaterialIcons name="library-books" size={16} color={Colors.textSecondary} />
+                <MaterialIcons name="library-books" size={14} color={Colors.primary} />
                 <Text style={styles.statValue}>{chapters.length}</Text>
                 <Text style={styles.statLabel}>Chapters</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <MaterialIcons name="check-circle" size={16} color={Colors.success} />
+                <MaterialIcons name="check-circle" size={14} color={Colors.success} />
                 <Text style={styles.statValue}>{chapters.filter(ch => ch.progress === 100).length}</Text>
                 <Text style={styles.statLabel}>Completed</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <MaterialIcons name="schedule" size={16} color={Colors.warning} />
+                <MaterialIcons name="schedule" size={14} color={Colors.warning} />
                 <Text style={styles.statValue}>{chapters.reduce((sum, ch) => sum + ch.duration, 0)}</Text>
                 <Text style={styles.statLabel}>Minutes</Text>
               </View>
+            </View>
+          </Card>
+        </View>
+
+        {/* Learning Objectives */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Learning Path</Text>
+          <Card variant="filled" style={styles.infoCard}>
+            <View style={styles.objectiveItem}>
+              <MaterialIcons name="check" size={16} color={Colors.success} />
+              <Text style={styles.objectiveText}>Master core concepts and foundations</Text>
+            </View>
+            <View style={styles.objectiveItem}>
+              <MaterialIcons name="check" size={16} color={Colors.success} />
+              <Text style={styles.objectiveText}>Apply knowledge through real examples</Text>
+            </View>
+            <View style={styles.objectiveItem}>
+              <MaterialIcons name="check" size={16} color={Colors.success} />
+              <Text style={styles.objectiveText}>Practice with exercises and assessments</Text>
             </View>
           </Card>
         </View>
@@ -211,7 +277,7 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
             renderItem={renderChapter}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
-            ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
+            ItemSeparatorComponent={ChapterSeparator}
           />
         </View>
       </ScrollView>
@@ -221,6 +287,7 @@ export const SubjectDetailScreen: React.FC<{ navigation: any; route: any }> = ({
 
 const styles = StyleSheet.create({
   flex1: { flex: 1 },
+  headerSpacer: { width: 24 },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -238,13 +305,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: FontSizes.titleMedium,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
   },
   headerSubtitle: {
     fontSize: FontSizes.labelSmall,
     color: Colors.textSecondary,
-    marginTop: Spacing.xs,
   },
   content: {
     flex: 1,
@@ -276,6 +343,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  overviewInfo: {
+    flex: 1,
+  },
   overviewTitle: {
     fontSize: FontSizes.labelSmall,
     color: Colors.textSecondary,
@@ -287,11 +357,11 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   progressBarContainer: {
-    height: 8,
+    height: 4,
     backgroundColor: Colors.gray200,
     borderRadius: 4,
     overflow: 'hidden',
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   progressBar: {
     height: '100%',
@@ -304,76 +374,148 @@ const styles = StyleSheet.create({
   statItem: {
     alignItems: 'center',
     flex: 1,
+    gap: Spacing.xs,
   },
   statValue: {
     fontSize: FontSizes.titleSmall,
     fontWeight: '700',
     color: Colors.textPrimary,
-    marginTop: Spacing.xs,
   },
   statLabel: {
     fontSize: FontSizes.labelSmall,
     color: Colors.textSecondary,
-    marginTop: Spacing.xs,
   },
   statDivider: {
     width: 1,
     height: 30,
     backgroundColor: Colors.gray200,
   },
-  chapterCard: {
-    padding: Spacing.md,
+  infoCard: {
+    padding: Spacing.lg,
+    gap: Spacing.md,
   },
-  chapterHeader: {
+  objectiveItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  objectiveText: {
+    fontSize: FontSizes.bodySmall,
+    color: Colors.textPrimary,
+    flex: 1,
+  },
+  chapterCard: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.xs,
+  },
+  chapterTop: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: Spacing.md,
     marginBottom: Spacing.md,
   },
   chapterName: {
-    fontSize: FontSizes.bodySmall,
+    fontSize: FontSizes.bodyMedium,
     fontWeight: '600',
     color: Colors.textPrimary,
     marginBottom: Spacing.xs,
   },
-  chapterMeta: {
+  chapterMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  metaText: {
     fontSize: FontSizes.labelSmall,
     color: Colors.textSecondary,
   },
   progressCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: Colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
   },
   progressText: {
-    fontSize: FontSizes.labelLarge,
+    fontSize: FontSizes.labelSmall,
     fontWeight: '700',
   },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.sm,
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.medium,
-    gap: Spacing.xs,
-    marginTop: Spacing.md,
+  topicsSection: {
+    marginBottom: Spacing.md,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray100,
   },
-  actionButtonCompleted: {
-    backgroundColor: Colors.success + '15',
-    borderWidth: 1,
-    borderColor: Colors.success,
-  },
-  actionButtonText: {
+  topicsSectionTitle: {
     fontSize: FontSizes.labelSmall,
     fontWeight: '600',
-    color: Colors.white,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
   },
-  actionButtonTextCompleted: {
+  topicsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    flexWrap: 'wrap',
+  },
+  topicTag: {
+    backgroundColor: Colors.primary + '12',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.medium,
+  },
+  topicText: {
+    fontSize: FontSizes.labelSmall,
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  moreTopics: {
+    fontSize: FontSizes.labelSmall,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+  },
+  chapterBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: Spacing.sm,
+  },
+  completedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  completedText: {
+    fontSize: FontSizes.labelSmall,
     color: Colors.success,
+    fontWeight: '600',
+  },
+  statusText: {
+    fontSize: FontSizes.labelSmall,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  smallButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.medium,
+  },
+  smallButtonText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.white,
   },
 });
 

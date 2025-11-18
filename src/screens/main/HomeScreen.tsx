@@ -366,7 +366,7 @@ export const HomeScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Subjects</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('ExamTab')}>
+            <TouchableOpacity onPress={() => navigation.navigate('SubjectList')}>
               <Text style={styles.seeAll}>Browse all</Text>
             </TouchableOpacity>
           </View>
@@ -384,7 +384,7 @@ export const HomeScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Practice Question Banks</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('ExamTab')}>
+            <TouchableOpacity onPress={() => navigation.navigate('QuestionBankList')}>
               <Text style={styles.seeAll}>All</Text>
             </TouchableOpacity>
           </View>

@@ -155,7 +155,7 @@ export const TestAttemptScreen: React.FC<{ navigation: any; route: any }> = ({
       <View style={styles.progressBar}>
         <View
           style={[
-            styles.progressFill,
+             styles.progressFill,
             { width: `${((currentIndex + 1) / questions.length) * 100}%` },
           ]}
         />
@@ -414,17 +414,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.success,
   },
   submitButton: {
-    width: 44,
-    height: 44,
+    flex: 1,
     borderRadius: BorderRadius.medium,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    gap: Spacing.xs,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    minHeight: 48,
   },
   submitButtonText: {
-    fontSize: FontSizes.labelSmall,
+    fontSize: FontSizes.labelMedium,
     fontWeight: '600',
     color: Colors.white,
   },

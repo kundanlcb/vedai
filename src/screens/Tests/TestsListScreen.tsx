@@ -144,9 +144,8 @@ export const TestsListScreen: React.FC<{ navigation: any; route: any }> = ({
       <TouchableOpacity
         style={styles.startButton}
         onPress={() =>
-          navigation.navigate('TestAttempt', {
-            testId: item.id,
-            testName: item.name,
+          navigation.navigate('ExamDetail', {
+            exam: item,
           })
         }
         activeOpacity={0.7}

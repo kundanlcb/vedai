@@ -117,20 +117,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: Spacing.lg,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
 
   // Variants
   primaryContainer: {
     backgroundColor: Colors.primary,
     shadowColor: Colors.primary,
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.4,
   },
   secondaryContainer: {
     backgroundColor: Colors.secondary,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.primary,
     shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.08,
   },
   textContainer: {
     backgroundColor: 'transparent',
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   largeContainer: {
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    minHeight: 56,
+    minHeight: 52,
   },
 
   // Disabled state
@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
   primaryText: {
     color: Colors.white,

@@ -20,8 +20,12 @@ import { Card } from '../../components';
 interface Question {
   id: string;
   title: string;
+  type: 'mcq' | 'subjective' | 'true-false' | 'fill-blank' | 'match';
   difficulty: 'easy' | 'medium' | 'hard';
   solved: boolean;
+  options?: string[]; // For MCQ
+  correctAnswer?: string; // For any type
+  answer?: string; // For subjective
 }
 
 interface ChapterQuestions {
@@ -36,30 +40,93 @@ export const QuestionBankDetailScreen: React.FC<{ navigation: any; route: any }>
   const insets = useSafeAreaInsets();
   const { questionBank } = route.params as { questionBank: any };
 
-  // Mock questions organized by chapter
+  // Mock questions organized by chapter with different types
   const [sections] = useState<ChapterQuestions[]>([
     {
       chapter: 'Chapter 1: Basics',
       data: [
-        { id: 'q1', title: 'What is the fundamental concept?', difficulty: 'easy', solved: true },
-        { id: 'q2', title: 'Explain the basic principles', difficulty: 'easy', solved: true },
-        { id: 'q3', title: 'Define key terms', difficulty: 'medium', solved: false },
+        {
+          id: 'q1',
+          title: 'What is the fundamental concept of photosynthesis?',
+          type: 'mcq',
+          options: ['Energy conversion', 'Nutrient absorption', 'Water filtration', 'Oxygen consumption'],
+          correctAnswer: 'Energy conversion',
+          difficulty: 'easy',
+          solved: true,
+        },
+        {
+          id: 'q2',
+          title: 'Explain the basic principles of evolution',
+          type: 'subjective',
+          difficulty: 'easy',
+          solved: true,
+        },
+        {
+          id: 'q3',
+          title: 'Mitochondria is called the powerhouse of the cell',
+          type: 'true-false',
+          correctAnswer: 'true',
+          difficulty: 'medium',
+          solved: false,
+        },
       ],
     },
     {
       chapter: 'Chapter 2: Intermediate',
       data: [
-        { id: 'q4', title: 'Apply concepts to examples', difficulty: 'medium', solved: true },
-        { id: 'q5', title: 'Analyze the problem', difficulty: 'medium', solved: true },
-        { id: 'q6', title: 'Solve complex scenarios', difficulty: 'hard', solved: false },
+        {
+          id: 'q4',
+          title: 'The process of breaking down glucose to release energy is called _______',
+          type: 'fill-blank',
+          correctAnswer: 'respiration',
+          difficulty: 'medium',
+          solved: true,
+        },
+        {
+          id: 'q5',
+          title: 'Which organelle is responsible for protein synthesis?',
+          type: 'mcq',
+          options: ['Ribosome', 'Golgi apparatus', 'Endoplasmic reticulum', 'Lysosome'],
+          correctAnswer: 'Ribosome',
+          difficulty: 'medium',
+          solved: true,
+        },
+        {
+          id: 'q6',
+          title: 'Match the following biological terms with their definitions',
+          type: 'match',
+          difficulty: 'hard',
+          solved: false,
+        },
       ],
     },
     {
       chapter: 'Chapter 3: Advanced',
       data: [
-        { id: 'q7', title: 'Critical thinking question', difficulty: 'hard', solved: false },
-        { id: 'q8', title: 'Multi-step problem solving', difficulty: 'hard', solved: false },
-        { id: 'q9', title: 'Integration and synthesis', difficulty: 'hard', solved: false },
+        {
+          id: 'q7',
+          title: 'Analyze the impact of climate change on biodiversity',
+          type: 'subjective',
+          difficulty: 'hard',
+          solved: false,
+        },
+        {
+          id: 'q8',
+          title: 'DNA is the primary genetic material in all organisms',
+          type: 'true-false',
+          correctAnswer: 'false',
+          difficulty: 'hard',
+          solved: false,
+        },
+        {
+          id: 'q9',
+          title: 'What is the process by which plants convert light energy into chemical energy?',
+          type: 'mcq',
+          options: ['Photosynthesis', 'Respiration', 'Fermentation', 'Transpiration'],
+          correctAnswer: 'Photosynthesis',
+          difficulty: 'hard',
+          solved: false,
+        },
       ],
     },
   ]);
@@ -84,14 +151,10 @@ export const QuestionBankDetailScreen: React.FC<{ navigation: any; route: any }>
   );
 
   const renderQuestion = ({ item }: { item: Question }) => (
-    <TouchableOpacity
-      style={styles.questionCard}
-      activeOpacity={0.7}
-      onPress={() => navigation.navigate('ExamTab')}
-    >
-      <View style={styles.questionHeader}>
+    <View style={styles.questionCard}>
+      <View style={styles.questionTop}>
         <View style={styles.flex1}>
-          <Text style={styles.questionTitle}>{item.title}</Text>
+          <Text style={styles.questionTitle} numberOfLines={2}>{item.title}</Text>
           <View style={styles.questionMeta}>
             <View
               style={[
@@ -110,19 +173,23 @@ export const QuestionBankDetailScreen: React.FC<{ navigation: any; route: any }>
             </View>
             {item.solved && (
               <View style={styles.solvedBadge}>
-                <MaterialIcons name="check" size={12} color={Colors.success} />
+                <MaterialIcons name="check" size={10} color={Colors.success} />
                 <Text style={styles.solvedText}>Solved</Text>
               </View>
             )}
           </View>
         </View>
-        <MaterialIcons
-          name={item.solved ? 'check-circle' : 'radio-button-unchecked'}
-          size={24}
-          color={item.solved ? Colors.success : Colors.gray300}
-        />
+        <TouchableOpacity
+          style={styles.quickActionButton}
+          activeOpacity={0.7}
+          onPress={() => {
+            navigation.navigate('QuestionDetail', { question: item, questionBank });
+          }}
+        >
+          <MaterialIcons name="arrow-forward" size={14} color={Colors.white} />
+        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   const renderSectionHeader = ({ section }: { section: ChapterQuestions }) => (
@@ -195,23 +262,11 @@ export const QuestionBankDetailScreen: React.FC<{ navigation: any; route: any }>
             renderItem={renderQuestion}
             renderSectionHeader={renderSectionHeader}
             scrollEnabled={false}
-            ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
-            SectionSeparatorComponent={() => <View style={{ height: Spacing.lg }} />}
+            ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
+            SectionSeparatorComponent={() => <View style={{ height: 12 }} />}
           />
         </View>
       </ScrollView>
-
-      {/* Start Practice Button */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.startButton}
-          activeOpacity={0.7}
-          onPress={() => navigation.navigate('ExamTab')}
-        >
-          <MaterialIcons name="play-arrow" size={20} color={Colors.white} />
-          <Text style={styles.startButtonText}>Start Practice</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
@@ -249,7 +304,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   statsCard: {
     padding: Spacing.lg,
@@ -258,7 +313,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   statBox: {
     alignItems: 'center',
@@ -312,14 +367,16 @@ const styles = StyleSheet.create({
   },
   questionCard: {
     backgroundColor: Colors.white,
-    padding: Spacing.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.medium,
     borderWidth: 1,
     borderColor: Colors.gray100,
+    minHeight: 80,
   },
-  questionHeader: {
+  questionTop: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: Spacing.md,
   },
   questionTitle: {
@@ -332,51 +389,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+    flexWrap: 'wrap',
   },
   difficultyBadge: {
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
     paddingVertical: 2,
     borderRadius: BorderRadius.medium,
   },
   difficultyText: {
-    fontSize: FontSizes.labelSmall,
+    fontSize: 11,
     fontWeight: '600',
     textTransform: 'capitalize',
   },
   solvedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
     paddingVertical: 2,
     backgroundColor: Colors.success + '15',
     borderRadius: BorderRadius.medium,
     gap: 2,
   },
   solvedText: {
-    fontSize: FontSizes.labelSmall,
+    fontSize: 11,
     color: Colors.success,
     fontWeight: '600',
   },
-  footer: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    backgroundColor: Colors.white,
-    borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
-  },
-  startButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-    backgroundColor: Colors.primary,
+  quickActionButton: {
+    width: 28,
+    height: 28,
     borderRadius: BorderRadius.medium,
-    gap: Spacing.sm,
-  },
-  startButtonText: {
-    fontSize: FontSizes.labelSmall,
-    fontWeight: '600',
-    color: Colors.white,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

@@ -29,11 +29,11 @@ export const ContentViewerScreen: React.FC<{ navigation: any; route: any }> = ({
   route,
 }) => {
   const insets = useSafeAreaInsets();
-  const { chapterName, subjectName } = route.params as {
-    chapterId: string;
-    chapterName: string;
-    subjectName: string;
-  };
+  const { chapter } = route.params as { chapter: any };
+
+  // Extract chapter name from chapter object or route params
+  const chapterName = chapter?.name || 'Chapter';
+  const subjectName = chapter?.subject || 'Subject';
 
   // Mock lesson data
   const lessons: Lesson[] = [

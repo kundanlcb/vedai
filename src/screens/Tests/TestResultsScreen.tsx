@@ -185,28 +185,36 @@ export const TestResultsScreen: React.FC<{ navigation: any; route: any }> = ({
           </View>
 
           <View style={styles.recommendationItem}>
-            <View style={styles.recommendationNumber}>1</View>
+            <View style={styles.recommendationNumber}>
+              <Text style={styles.recommendationNumberText}>1</Text>
+            </View>
             <Text style={styles.recommendationText}>
               Focus on topics with low accuracy
             </Text>
           </View>
 
           <View style={styles.recommendationItem}>
-            <View style={styles.recommendationNumber}>2</View>
+            <View style={styles.recommendationNumber}>
+              <Text style={styles.recommendationNumberText}>2</Text>
+            </View>
             <Text style={styles.recommendationText}>
               Practice similar test patterns
             </Text>
           </View>
 
           <View style={styles.recommendationItem}>
-            <View style={styles.recommendationNumber}>3</View>
+            <View style={styles.recommendationNumber}>
+              <Text style={styles.recommendationNumberText}>3</Text>
+            </View>
             <Text style={styles.recommendationText}>
               Take timed mock tests regularly
             </Text>
           </View>
 
           <View style={styles.recommendationItem}>
-            <View style={styles.recommendationNumber}>4</View>
+            <View style={styles.recommendationNumber}>
+              <Text style={styles.recommendationNumberText}>4</Text>
+            </View>
             <Text style={styles.recommendationText}>
               Review your mistakes carefully
             </Text>
@@ -424,7 +432,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.warning + '20',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  recommendationNumberText: {
+    fontSize: FontSizes.labelLarge,
     fontWeight: '700',
+    color: Colors.warning,
   },
   recommendationText: {
     flex: 1,
