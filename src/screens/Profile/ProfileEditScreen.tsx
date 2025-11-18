@@ -262,7 +262,7 @@ export const ProfileEditScreen: React.FC<{ navigation: any }> = ({ navigation })
           <Card variant="filled">
             <TouchableOpacity
               style={styles.dangerButton}
-              onPress={() => Alert.alert('Change Password', 'Feature coming soon')}
+              onPress={() => navigation.navigate('ChangePassword')}
             >
               <MaterialIcons name="lock" size={20} color={Colors.error} />
               <Text style={styles.dangerButtonText}>Change Password</Text>

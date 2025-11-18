@@ -1,203 +1,315 @@
 /**
- * Learn Module - Subject List Screen
- * Displays all available subjects with progress indicators
+ * Subject List Screen
+ * Shows all available subjects for learning
  */
 
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
-  useColorScheme,
+  ScrollView,
+  Text,
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useGetSubjects } from '../../hooks/useChapters';
-import { Text } from '../../components/ui/Text';
-import { Card } from '../../components/ui/Card';
-import { Loading } from '../../components/ui/Loading';
-import { getColors } from '../../theme/colors';
-import { Spacing, BorderRadius } from '../../theme/typography';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
+import { Card } from '../../components';
 
-type Props = any;
+interface Subject {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  chapters: number;
+  progress: number;
+  description?: string;
+}
 
-export const SubjectListScreen: React.FC<Props> = ({ navigation }) => {
-  const colorMode = (useColorScheme() || 'light') as 'light' | 'dark';
-  const colors = getColors(colorMode);
+export const SubjectListScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
 
-  // Define styles before using them
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
+  const [subjects] = useState<Subject[]>([
+    {
+      id: '1',
+      name: 'Mathematics',
+      icon: 'calculate',
+      color: '#FF6B6B',
+      chapters: 15,
+      progress: 60,
+      description: 'Algebra, Geometry, Trigonometry & more',
     },
-    content: {
-      padding: Spacing.lg,
+    {
+      id: '2',
+      name: 'Science',
+      icon: 'science',
+      color: '#4ECDC4',
+      chapters: 18,
+      progress: 45,
+      description: 'Physics, Chemistry, Biology',
     },
-    header: {
-      marginBottom: Spacing.lg,
+    {
+      id: '3',
+      name: 'English',
+      icon: 'language',
+      color: '#FFD93D',
+      chapters: 12,
+      progress: 75,
+      description: 'Literature, Grammar, Composition',
     },
-    title: {
-      marginBottom: Spacing.sm,
+    {
+      id: '4',
+      name: 'History',
+      icon: 'history',
+      color: '#6BCB77',
+      chapters: 14,
+      progress: 40,
+      description: 'Ancient, Medieval, Modern',
     },
-    subtitle: {
-      marginBottom: Spacing.lg,
+    {
+      id: '5',
+      name: 'Geography',
+      icon: 'public',
+      color: '#4D96FF',
+      chapters: 10,
+      progress: 55,
+      description: 'Physical & Human Geography',
     },
-    subjectCard: {
-      marginBottom: Spacing.lg,
+    {
+      id: '6',
+      name: 'Economics',
+      icon: 'trending-up',
+      color: '#FF8787',
+      chapters: 11,
+      progress: 30,
+      description: 'Micro & Macroeconomics',
     },
-    cardHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: Spacing.md,
-    },
-    subjectInfo: {
-      flex: 1,
-      marginRight: Spacing.md,
-    },
-    description: {
-      marginTop: Spacing.xs,
-    },
-    progressCircle: {
-      width: 70,
-      height: 70,
-      borderRadius: 35,
-      backgroundColor: colors.surface,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderColor: '#10B981',
-      borderWidth: 3,
-    },
-    progressBar: {
-      height: 8,
-      backgroundColor: colors.border,
-      borderRadius: BorderRadius.full,
-      overflow: 'hidden',
-      marginBottom: Spacing.sm,
-    },
-    progressFill: {
-      height: '100%',
-      backgroundColor: '#10B981',
-    },
-    progressText: {
-      marginTop: Spacing.sm,
-    },
-    errorContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: Spacing.lg,
-    },
-    errorText: {
-      marginTop: Spacing.md,
-      textAlign: 'center',
-    },
-  });
+  ]);
 
-  // Fetch subjects for the student's class
-  const { data: subjects, isLoading: subjectsLoading, error: subjectsError } = useGetSubjects(
-    'Class 10' // TODO: Get from student profile
-  );
-
-  // Calculate subject progress
-  const subjectsWithProgress = useMemo(() => {
-    if (!subjects?.data) return [];
-
-    return subjects.data.map((subject: any) => {
-      const subjectProgress = {
-        completion_percentage: Math.random() * 0.5, // Mock: 0-50%
-        chapters_completed: Math.floor(Math.random() * 3),
-        total_chapters: 5,
-      };
-
-      return {
-        ...subject,
-        progress: subjectProgress,
-      };
-    });
-  }, [subjects]);
-
-  const handleSubjectPress = (subjectId: string, subjectName: string) => {
-    navigation.navigate('ChapterList', { subjectId, subjectName });
+  const getProgressColor = (progress: number) => {
+    if (progress === 100) return Colors.success;
+    if (progress >= 75) return '#00BCD4';
+    if (progress >= 50) return Colors.warning;
+    if (progress >= 25) return '#FF9800';
+    return Colors.textSecondary;
   };
 
-  const renderSubjectCard = ({ item }: { item: any }) => (
-    <TouchableOpacity onPress={() => handleSubjectPress(item.id, item.name)}>
-      <Card style={styles.subjectCard}>
-        <View style={styles.cardHeader}>
-          <View style={styles.subjectInfo}>
-            <Text variant="h5" color="primary" weight="semibold">
-              {item.name}
-            </Text>
-            <Text variant="body_sm" color="secondary" style={styles.description}>
-              {item.description}
-            </Text>
-          </View>
-          <View style={styles.progressCircle}>
-            <Text variant="h6" color="primary" weight="bold">
-              {Math.round((item.progress?.completion_percentage || 0) * 100)}%
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.progressBar}>
-          <View
-            style={[
-              styles.progressFill,
-              {
-                width: `${Math.round((item.progress?.completion_percentage || 0) * 100)}%`,
-              },
-            ]}
+  const renderSubject = ({ item }: { item: Subject }) => (
+    <TouchableOpacity
+      style={styles.subjectCard}
+      activeOpacity={0.7}
+      onPress={() => navigation.navigate('SubjectDetail', { subject: item })}
+    >
+      <View style={styles.cardContent}>
+        <View style={[styles.subjectIcon, { backgroundColor: item.color + '18' }]}>
+          <MaterialIcons
+            name={item.icon as any}
+            size={32}
+            color={item.color}
           />
         </View>
 
-        <Text variant="body_xs" color="secondary" style={styles.progressText}>
-          {item.progress?.chapters_completed || 0} of {item.progress?.total_chapters || 5} chapters completed
-        </Text>
-      </Card>
+        <View style={styles.subjectInfo}>
+          <Text style={styles.subjectName} numberOfLines={1}>{item.name}</Text>
+          <Text style={styles.subjectDescription} numberOfLines={1}>
+            {item.description || `${item.chapters} chapters`}
+          </Text>
+          <View style={styles.progressBarContainer}>
+            <View style={styles.progressBar}>
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    width: `${item.progress}%`,
+                    backgroundColor: getProgressColor(item.progress),
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.progressText}>{item.progress}%</Text>
+          </View>
+        </View>
+
+        <View style={[styles.chapterBadge, { borderColor: item.color }]}>
+          <Text style={[styles.chapterCount, { color: item.color }]}>
+            {item.chapters}
+          </Text>
+          <Text style={[styles.chapterLabel, { color: item.color }]}>ch</Text>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 
-  if (subjectsLoading) {
-    return <Loading visible={true} message="Loading subjects..." />;
-  }
-
-  if (subjectsError) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <Text variant="h5" color="error">
-            Failed to load subjects
-          </Text>
-          <Text variant="body_sm" color="secondary" style={styles.errorText}>
-            {(subjectsError as Error).message}
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={subjectsWithProgress}
-        renderItem={renderSubjectCard}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.content}
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Text variant="h3" color="primary" style={styles.title}>
-              Learn
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <MaterialIcons name="arrow-back" size={24} color={Colors.textPrimary} />
+        </TouchableOpacity>
+        <View style={styles.flex1}>
+          <Text style={styles.headerTitle}>Subjects</Text>
+          <Text style={styles.headerSubtitle}>All available subjects</Text>
+        </View>
+        <View style={styles.headerSpacer} />
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Info Card */}
+        <View style={styles.section}>
+          <Card variant="filled" style={styles.infoCard}>
+            <View style={styles.infoHeader}>
+              <MaterialIcons name="info" size={20} color={Colors.primary} />
+              <Text style={styles.infoTitle}>Learning Subjects</Text>
+            </View>
+            <Text style={styles.infoText}>
+              Select a subject to view chapters, practice questions, and track your progress.
             </Text>
-            <Text variant="body_sm" color="secondary" style={styles.subtitle}>
-              Select a subject to start learning
-            </Text>
-          </View>
-        }
-        scrollIndicatorInsets={{ right: 1 }}
-      />
-    </SafeAreaView>
+          </Card>
+        </View>
+
+        {/* Subjects List */}
+        <View style={styles.section}>
+          <FlatList
+            data={subjects}
+            renderItem={renderSubject}
+            keyExtractor={(item) => item.id}
+            scrollEnabled={false}
+            ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
+          />
+        </View>
+      </ScrollView>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+  headerSpacer: { width: 24 },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray200,
+    gap: Spacing.md,
+  },
+  headerTitle: {
+    fontSize: FontSizes.titleMedium,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+  },
+  headerSubtitle: {
+    fontSize: FontSizes.labelSmall,
+    color: Colors.textSecondary,
+  },
+  content: {
+    flex: 1,
+    paddingVertical: Spacing.lg,
+  },
+  section: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  infoCard: {
+    padding: Spacing.lg,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  infoTitle: {
+    fontSize: FontSizes.titleSmall,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  infoText: {
+    fontSize: FontSizes.bodySmall,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  subjectCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.medium,
+    overflow: 'hidden',
+  },
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    gap: Spacing.lg,
+  },
+  subjectIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: BorderRadius.medium,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  subjectInfo: {
+    flex: 1,
+  },
+  subjectName: {
+    fontSize: FontSizes.labelLarge,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+  },
+  subjectDescription: {
+    fontSize: FontSizes.labelSmall,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  progressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  progressBar: {
+    flex: 1,
+    height: 6,
+    backgroundColor: Colors.gray200,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: FontSizes.labelSmall,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    minWidth: 35,
+    textAlign: 'right',
+  },
+  chapterBadge: {
+    borderWidth: 2,
+    borderRadius: BorderRadius.medium,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  chapterCount: {
+    fontSize: FontSizes.labelLarge,
+    fontWeight: '700',
+  },
+  chapterLabel: {
+    fontSize: FontSizes.labelSmall,
+    fontWeight: '600',
+  },
+});
 

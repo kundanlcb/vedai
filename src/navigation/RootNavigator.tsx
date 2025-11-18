@@ -9,10 +9,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../context';
 import { LoadingScreen } from '../components/common';
 import { LoginScreen } from '../screens/auth';
+import { RegisterScreen } from '../screens/auth/RegisterScreen';
+import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { BottomTabNavigator } from './BottomTabNavigator';
 
 export type RootStackParamList = {
   Login: undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
   Main: undefined;
 };
 
@@ -38,10 +42,20 @@ export const RootNavigator: React.FC = () => {
             component={BottomTabNavigator}
           />
         ) : (
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-          />
+          <>
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+            />
+            <Stack.Screen
+              name="Register"
+              component={RegisterScreen}
+            />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+            />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

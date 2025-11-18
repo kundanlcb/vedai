@@ -12,7 +12,7 @@ import {
   Text,
   KeyboardAvoidingView,
   Platform,
-
+  ActivityIndicator,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
@@ -20,9 +20,10 @@ import {
   SafeAreaView,
 } from 'react-native-safe-area-context';
 import { Colors, FontSizes, Spacing, BorderRadius } from '../../constants';
-import { Button, TextInputField } from '../../components';
+import { TextInputField } from '../../components';
 import { useForm } from '../../hooks';
 import { useValidation } from '../../hooks';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context';
 
 interface LoginFormData {
@@ -36,6 +37,7 @@ const DISABLE_VALIDATION = true;
 
 export const LoginScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
   const { login } = useAuth();
   const { validateEmail, validatePassword } = useValidation();
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -140,23 +142,35 @@ export const LoginScreen: React.FC = () => {
             </View>
 
             <TouchableOpacity style={styles.forgotLink}>
-              <Text style={styles.forgotText}>Forgot password?</Text>
+              <Text style={styles.forgotText} onPress={() => navigation.navigate('ForgotPassword')}>Forgot password?</Text>
             </TouchableOpacity>
 
-            <Button
-              title={form.isSubmitting ? 'Signing in...' : 'Sign In'}
+            <TouchableOpacity
+              style={[styles.signInButton, form.isSubmitting && styles.signInButtonDisabled]}
               onPress={handleLogin}
-              variant="primary"
-              size="large"
               disabled={form.isSubmitting}
-              style={styles.loginButton}
-            />
+              activeOpacity={0.8}
+            >
+              <View style={styles.signInButtonContent}>
+                {form.isSubmitting ? (
+                  <>
+                    <ActivityIndicator color={Colors.white} size="small" style={styles.buttonLoader} />
+                    <Text style={styles.signInButtonText}>Signing in...</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.signInButtonText}>Sign In</Text>
+                    <MaterialIcons name="arrow-forward" size={18} color={Colors.white} style={styles.buttonIcon} />
+                  </>
+                )}
+              </View>
+            </TouchableOpacity>
           </View>
 
           {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>New to VedAI? </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
               <Text style={styles.signupLink}>Create account</Text>
             </TouchableOpacity>
           </View>
@@ -260,9 +274,42 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  loginButton: {
-    marginBottom: Spacing.md,
+  signInButton: {
     marginTop: Spacing.lg,
+    marginBottom: Spacing.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.large,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 50,
+    elevation: 6,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+  },
+  signInButtonDisabled: {
+    opacity: 0.7,
+  },
+  signInButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+  },
+  signInButtonText: {
+    fontSize: FontSizes.labelLarge,
+    fontWeight: '700',
+    color: Colors.white,
+    letterSpacing: 0.5,
+  },
+  buttonIcon: {
+    marginLeft: Spacing.xs,
+  },
+  buttonLoader: {
+    marginRight: Spacing.xs,
   },
 
   // Footer

@@ -72,7 +72,7 @@ export const ProfileScreen: React.FC = () => {
       icon: 'lock',
       label: 'Change Password',
       onPress: () => {
-        Alert.alert('Change Password', 'Feature coming soon');
+        navigation.navigate('ProfileTab', { screen: 'ChangePassword' });
       },
     },
     {
@@ -80,7 +80,7 @@ export const ProfileScreen: React.FC = () => {
       icon: 'help',
       label: 'Help & Support',
       onPress: () => {
-        Alert.alert('Help & Support', 'Feature coming soon');
+        navigation.navigate('ProfileTab', { screen: 'HelpSupport' });
       },
     },
     {
@@ -88,7 +88,7 @@ export const ProfileScreen: React.FC = () => {
       icon: 'info',
       label: 'About VedAI',
       onPress: () => {
-        Alert.alert('About VedAI', 'VEDAI Student Learning Platform v1.0.0\n\nYour personal AI learning companion');
+        navigation.navigate('ProfileTab', { screen: 'About' });
       },
     },
   ];
